@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "481266476556",
+    "project_id": "sef25-588df",
+    "storage_bucket": "sef25-588df.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481266476556:android:bcff21bf5d911fd023b029",
+        "android_client_info": {
+          "package_name": "com.sef"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCj22rZMctONjjRFLAToyy7veMMLFKyWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

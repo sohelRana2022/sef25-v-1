@@ -1,0 +1,125 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/HindSiliguri-Bold.ttf",
+      "sha1": "30564ccaf590dd3243a3818b7f97d019909ddc9a"
+    },
+    {
+      "path": "assets/fonts/HindSiliguri-Light.ttf",
+      "sha1": "e4ca1e41c4aed08bdf52f6380d0d87f70928f8e3"
+    },
+    {
+      "path": "assets/fonts/HindSiliguri-Medium.ttf",
+      "sha1": "4b7d92e2b43400b2375da8124d247dbb913e4321"
+    },
+    {
+      "path": "assets/fonts/HindSiliguri-Regular.ttf",
+      "sha1": "1aa1c0b58701dc320b48eb98940418a644eea59f"
+    },
+    {
+      "path": "assets/fonts/HindSiliguri-SemiBold.ttf",
+      "sha1": "e75ec38ea60dbaebcfffa3e230bcd91c92447e4a"
+    },
+    {
+      "path": "assets/fonts/Kalpana UNICODE.ttf",
+      "sha1": "c3f020c03954968e966a86b6647984769ebc8157"
+    },
+    {
+      "path": "assets/fonts/NotoSerifBengali-VariableFont_wdth,wght.ttf",
+      "sha1": "dd30d1f42f32d95e5d2cd2613c1387c7e43c4e58"
+    },
+    {
+      "path": "assets/fonts/NotoSerifBengali_Condensed-Black.ttf",
+      "sha1": "30c362af61a6bb03cf29fad221c061f8b0ed0fb7"
+    },
+    {
+      "path": "assets/fonts/NotoSerifBengali_Condensed-Bold.ttf",
+      "sha1": "ca5cd37066cd6e279bfd757ee70cf834157bf439"
+    },
+    {
+      "path": "assets/fonts/NotoSerifBengali_Condensed-Light.ttf",
+      "sha1": "31d5881b61fed93db97f908ae413bf998eab16e9"
+    },
+    {
+      "path": "assets/fonts/NotoSerifBengali_Condensed-Medium.ttf",
+      "sha1": "e2f690e8e1951906cada3cad531b08ef606f41df"
+    },
+    {
+      "path": "assets/fonts/NotoSerifBengali_Condensed-Regular.ttf",
+      "sha1": "a93f7e2366b78510c777ceb86b9eba502a0e7d7e"
+    },
+    {
+      "path": "assets/fonts/Pacifico-Regular.ttf",
+      "sha1": "baca1fca7fe74b61cb33aa0da48ec1a3a77bcf49"
+    },
+    {
+      "path": "assets/fonts/Roboto-Black.ttf",
+      "sha1": "3f8e401d808f6ce84b542266726514ac8be73171"
+    },
+    {
+      "path": "assets/fonts/Roboto-BlackItalic.ttf",
+      "sha1": "03d6e3747d862385dbe48e8296385b9236101a62"
+    },
+    {
+      "path": "assets/fonts/Roboto-Bold.ttf",
+      "sha1": "62442a18a9fe9457c1afeabf683d263a691b7798"
+    },
+    {
+      "path": "assets/fonts/Roboto-BoldItalic.ttf",
+      "sha1": "2f10ad9e8cab0880182705c4e0fbaeabae706e64"
+    },
+    {
+      "path": "assets/fonts/Roboto-Italic.ttf",
+      "sha1": "65f3f6a7e1bd2fa6f2df35e4b07775d7f1dde4f0"
+    },
+    {
+      "path": "assets/fonts/Roboto-Light.ttf",
+      "sha1": "18788c5d630fa695f9283f6393bfa541b2031508"
+    },
+    {
+      "path": "assets/fonts/Roboto-LightItalic.ttf",
+      "sha1": "6e01f9df9449565697032b002706a94b51862bbe"
+    },
+    {
+      "path": "assets/fonts/Roboto-Medium.ttf",
+      "sha1": "3c6a09fcc6a454924c81af7dff94fc6d399ed79b"
+    },
+    {
+      "path": "assets/fonts/Roboto-MediumItalic.ttf",
+      "sha1": "b3aa2d8f16d5a331fdced82f213a052b204eaca0"
+    },
+    {
+      "path": "assets/fonts/Roboto-Regular.ttf",
+      "sha1": "56c5c0d38bde4c1f1549dda43db37b09c608aad3"
+    },
+    {
+      "path": "assets/fonts/Roboto-Thin.ttf",
+      "sha1": "58c733e22bceeaf9609ce578eca92ac303c6d92f"
+    },
+    {
+      "path": "assets/fonts/Roboto-ThinItalic.ttf",
+      "sha1": "cc79d5a23bd0ec08b1d99f5390bf33cacc3082f4"
+    },
+    {
+      "path": "assets/fonts/Sacramento-Regular.ttf",
+      "sha1": "bb942772a1f61c2f6cc0f980a9da39f1fc602d00"
+    },
+    {
+      "path": "assets/fonts/SutonnyMJ-Bold.ttf",
+      "sha1": "ee6aec885eaad5b28049ef9ac2a8426cf45bbba5"
+    },
+    {
+      "path": "assets/fonts/SutonnyOMJ.ttf",
+      "sha1": "1db8eb50da19ca40f9669fd5531e59ba304b9f26"
+    },
+    {
+      "path": "assets/fonts/TiroBangla-Italic.ttf",
+      "sha1": "ae41221ad6b5c4d8fc150f0a3d123199cbe5160c"
+    },
+    {
+      "path": "assets/fonts/TiroBangla-Regular.ttf",
+      "sha1": "1fa97cafb2b6fe3301ec6f73b2bbafc7f87e3705"
+    }
+  ]
+}

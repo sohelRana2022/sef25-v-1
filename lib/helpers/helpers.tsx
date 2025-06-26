@@ -1,0 +1,144 @@
+
+import axios from 'axios';
+import { Linking } from 'react-native'
+//import { SendDirectSms } from 'react-native-send-direct-sms';
+
+
+// Validation Rules
+const isValidEmail =(value:string)=> {
+    const regx = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+    return regx.test(value)
+  }
+  const isValidObj = (obj:object) : any => {
+    return Object.values(obj).every(value=>value.trim());
+  }
+  const isValidMobile =(mobile: string)=>{
+    const regx = /(^(01){1}[3-9]{1}(\d){8})$/;
+    return regx.test(mobile)
+  }
+  
+// update error
+const updateError = (error: string, stateUpdater: any): any => {
+    stateUpdater(error);
+    setTimeout(()=>{
+      stateUpdater('');
+    },2500);
+  }
+
+
+
+const gp = (mark:number)=>{
+  if(mark < 33){
+    return 0;
+  }else if(mark < 40){
+    return 1;
+  }else if(mark < 50){
+    return 2;
+  }else if(mark < 60){
+    return 3;
+  }else if(mark < 70){
+    return 3.5;
+  }else if(mark < 80){
+    return 4;
+  }else{
+    return 5;
+  }
+}
+
+
+
+
+// const sendSMS = async (phoneNumber:string, message:string) => {
+//     const url = `sms:${phoneNumber}?body=${message}`
+//     await Linking.openURL(url)
+//   }
+
+  // Send SMS from sim directly from this app
+  // const sendSMS = async (mobileNumber:string, bodySMS:string) => {
+  //   await SendDirectSms(mobileNumber, bodySMS)
+  //     .then(res => res)
+  //     .catch(err => err)
+  // }
+
+
+
+function removeAttributes<T extends object>(arr: T[], attributes: (keyof T)[]): Partial<T>[] {
+    return arr.map(obj => {
+        let newObj: Partial<T> = { ...obj };
+        attributes.forEach(attr => {
+            delete newObj[attr];
+        });
+        return newObj;
+    });
+}
+
+
+
+
+
+const getDataFromSheet = async (url:string) => {
+  try {
+    const res = await axios.get(url);
+    if (res.data.status) {
+      return res.data.response;
+    } else {
+      return res.data.message;
+    }
+  } catch (err) {
+    console.log('Network error! Please, connect your network first.');
+  }
+};
+
+// format a date-time
+const formatedDateTime = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+  };
+  return date.toLocaleString('en-US', options);
+};
+
+
+
+
+const splitByFirstSpace = (str:string) => {
+  const index = str.indexOf(' ');
+  
+  if (index === -1) {
+    // If there's no space, return the original string and an empty string
+    return [str, ''];
+  }
+  
+  // Split the string into two parts: before and after the first space
+  return [str.slice(0, index), str.slice(index + 1)];
+}
+export function countByPropWithRank<T>(
+  array: T[],
+  prop: keyof T
+): { rank: number; countByItem: string; total: number }[] {
+  const countMap: Record<string, number> = {};
+
+  array.forEach(item => {
+    const key = String(item[prop] ?? 'ref_person'); // fallback for undefined/null
+    countMap[key] = (countMap[key] || 0) + 1;
+  });
+
+  const sorted = Object.entries(countMap)
+    .sort((a, b) => b[1] - a[1]);
+
+  return sorted.map(([value, total], index) => ({
+    rank: index + 1,
+    countByItem: value,
+    total
+  }));
+}
+
+
+
+export {splitByFirstSpace, formatedDateTime, getDataFromSheet, removeAttributes, isValidEmail, updateError, isValidObj, isValidMobile, gp}
