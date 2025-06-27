@@ -13,7 +13,7 @@ import { API_URL } from '../../apis/config';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import firestore from '@react-native-firebase/firestore';
-const ITEM_HEIGHT = height / 5;
+const ITEM_HEIGHT = height / 7;
 
 interface NewStuInfoScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -118,16 +118,15 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
             : null
         }
       >
-        <View className="flex-row">
+        <View className="flex-row pt-3">
           <View className="w-1/4 flex-column items-center">
-            <UserIcon name="user-alt" color="rgba(16, 36, 33, 1)" size={50} />
+            <UserIcon name="user-alt" color="rgba(16, 36, 33, 0.4)" size={50} />
             <Text className="text-gray-600 font-HindSemiBold">{`${item.stu_class}`}</Text>
           </View>
           <View className="w-3/4">
-            <Text className="text-gray-900 font-HindSemiBold text-sm">{`নাম: ${item.stu_name_bn}`}</Text>
-            <Text className="text-gray-900 font-HindSemiBold text-sm">{`পিতার নাম: ${item.father_name}`}</Text>
-            <Text className="text-gray-900 font-HindSemiBold text-sm">{`শিক্ষকের নাম: ${item.ref_person}`}</Text>
-            <Text className="text-gray-900 font-HindSemiBold text-sm">{`ঠিকানা: ${item.village}`}</Text>
+            <Text className="text-gray-900 font-HindRegular text-sm">{`নাম: ${item.stu_name_bn}`}</Text>
+            <Text className="text-gray-900 font-HindRegular text-sm">{`পিতার নাম: ${item.father_name}`}</Text>
+            <Text className="text-gray-900 font-HindRegular text-sm">{`ঠিকানা: ${item.address+', '+ item.village}`}</Text>
           </View>
         </View>
         <View className="absolute right-0 top-0">

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import {Alert, FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { INFO_API_URL } from '../../apis/config';
 import { insertData, readAllData, deleteData } from '../../lib/crudFuncs/crud';
 import { Card } from 'react-native-paper';
@@ -9,8 +9,12 @@ import { useAppContexts } from '../../contexts/AppContext';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import { countByPropWithRank } from '../../lib/helpers/helpers';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 const uData = {"contact": "01740096872", "email": "sof@gmail.com", "id": "5K5CM5vrnBdoHIYGgANJ", "imageId": "FsjkwjvzkzigammKzv", "role": "Director", "sefBranch": "তারাকান্দি", "userName": "রবিন রানা"}
 interface StatisticsScreenProps{
+    navigation: NativeStackNavigationProp<any, any>;
+    route: RouteProp<any, any>;
 }
 
 
@@ -67,9 +71,11 @@ const summarizeByRefPerson = (data: StudentInfo[]): Summary[] => {
 };
 
 const StatisticsScreen = (props: StatisticsScreenProps) => {
+  const [data, setData] = useState<StudentInfo[]>([]);
   const [filteredData, setFilteredData] = useState<Summary[]>([]);
+  const {navigation, route}= props;
   const { loader, setLoader } = useAppContexts();
-
+  const {user} = useAuthContexts();
   const listHeader=()=>{
     return(
       <Card className='flex-1 px-1 py-1 mx-2 my-0.5 justify-center items-center'>
@@ -88,6 +94,19 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
   const renderItem = ({ item, index }: { item: { ref_person: string, total: number, admitted: number, posibility100: number }, index: number })=>{
     return (
       <Card className='flex-1 px-1 py-1 mx-2 my-0.5 justify-center items-center'>
+          <TouchableOpacity
+            onPress={()=>{
+                user?.nameBang === item.ref_person || user?.role === 'admin' ? 
+                navigation.navigate('NewStuInfoByTeacher', 
+                  {teaData:data.filter(r=>r.ref_person===item.ref_person).sort((a,b)=>b.posibility-a.posibility), item})
+                : null
+              }
+              
+              }
+                
+          >
+
+          
           <View
             className='flex-row'
           > 
@@ -98,6 +117,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
             <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.posibility100}`}</Text>
             <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.admitted}`}</Text>
           </View>
+          </TouchableOpacity>
       </Card>
     )
   }
@@ -139,7 +159,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
                 add_date: data.add_date,
               };
           });
-          
+        setData(newStuData);
         const countedData = summarizeByRefPerson(newStuData)
         
         setFilteredData(countedData)

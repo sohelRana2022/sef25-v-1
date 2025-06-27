@@ -149,8 +149,6 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
           </View> : 
           
-
-
           <FlatList
             data={searchText=== '' ? data : filteredData}
             initialNumToRender={50}
@@ -162,10 +160,11 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
             getItemLayout={(data, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
           />
         }
+
         {loader && (
               <View style={styles.loaderOverlay}>
-                <ActivityIndicator size="large" color="#6200ee" />
-                <Text className='text-base text-[#666] pt-5'>Wait! data loading .....</Text>
+                <ActivityIndicator size="large" color="#FFF" />
+                <Text className='text-base text-[#FFF] pt-5'>Wait! loading .....</Text>
               </View>
             )}
     </View>
