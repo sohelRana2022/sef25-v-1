@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import {Alert, FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { INFO_API_URL } from '../../apis/config';
 import { insertData, readAllData, deleteData } from '../../lib/crudFuncs/crud';
-import { Card } from 'react-native-paper';
+import { Card, DataTable } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
 import { useAppContexts } from '../../contexts/AppContext';
 import { useAuthContexts } from '../../contexts/AuthContext';
@@ -76,8 +76,8 @@ const summarizeByRefPerson = (data: StudentInfo[]): Summary[] => {
 };
 
 const StatisticsScreen = (props: StatisticsScreenProps) => {
-  const [data, setData] = useState<StudentInfo[]>([]);
-  const [filteredData, setFilteredData] = useState<Summary[]>([]);
+  const [allData, setAllData] = useState<StudentInfo[]>([]);
+  const [summeryData, setSummeryData] = useState<Summary[]>([]);
   const {navigation, route}= props;
   const { loader, setLoader } = useAppContexts();
   const {user} = useAuthContexts();
@@ -96,37 +96,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
         </Card>
       )
   }
-  const renderItem = ({ item, index }: { item: {ref_uid: string, ref_person: string, total_add: number, total: number, admitted: number, posibility100: number }, index: number })=>{
-    return (
-      <Card className='flex-1 px-1 py-1 mx-2 my-0.5 justify-center items-center'>
-          <TouchableOpacity
-            onPress={()=>{
-              console.log(user?.uid + '     ' + item.ref_uid)
-                user?.uid === item.ref_uid || user?.role === 'admin' ? 
-                navigation.navigate('NewStuInfoByTeacher', 
-                  {teaData:data.filter(r=>r.ref_uid===item.ref_uid).sort((a,b)=>b.posibility-a.posibility), item})
-                : null
-              }
-              
-              }
-                
-          >
 
-          
-          <View
-            className='flex-row'
-          > 
-          
-            <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base' >{`${index+1}`}</Text>
-            <Text className='w-[40%] text-gray-900 font-HindLight text-left text-base'>{`${item.ref_person}`}</Text>
-            <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.total}`}</Text>
-            <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.posibility100}`}</Text>
-            <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.total_add}`}</Text>
-          </View>
-          </TouchableOpacity>
-      </Card>
-    )
-  }
 
   const getChartData = async () => {
     setLoader(true);
@@ -138,7 +108,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
         const snapshot = await firestore()
           .collection('newinfos')
           .where('add_date', '>=', startOfYear)
-          .get();
+          .get(); 
 
         const newStuData = snapshot.docs.map(doc => {
             const data = doc.data();
@@ -165,10 +135,10 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
                 add_point: data.add_point
               };
           });
-        setData(newStuData);
+        setAllData(newStuData);
         const countedData = summarizeByRefPerson(newStuData)
         
-        setFilteredData(countedData)
+        setSummeryData(countedData)
         setLoader(false);
     } catch (error) {
       console.log(error)
@@ -184,16 +154,16 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
   return (
     <>
     {loader ? <LoaderAnimation/> : 
-      <FlatList
-        data={filteredData}
-        initialNumToRender={50}
-        maxToRenderPerBatch={50}
-        windowSize={50}
-        renderItem={renderItem}
-        ListHeaderComponent={listHeader}
-        keyExtractor={(item, index) => index.toString()}
-        showsVerticalScrollIndicator={false}
-      />}
+
+
+       <StatisticTable
+          allData={allData}
+          data={summeryData}
+          navigation={navigation}
+          route={route}
+        />     
+      
+      }
      </>
   );
 };
@@ -201,4 +171,85 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
 export default StatisticsScreen;
 
 
+type StatisticTableProps = {
+  allData: StudentInfo[];
+  data: Summary[];
+  navigation: NativeStackNavigationProp<any, any>;
+  route: RouteProp<any, any>;
+};
 
+
+const StatisticTable = ({
+  allData,
+  data,
+  navigation,
+  route,
+}: StatisticTableProps) => {
+  const { user } = useAuthContexts();
+  const [page, setPage] = React.useState<number>(0);
+  const [numberOfItemsPerPageList] = React.useState([5,8,10]);
+  const [itemsPerPage, onItemsPerPageChange] = React.useState(
+    numberOfItemsPerPageList[0]
+  );
+
+  const from = page * itemsPerPage;
+  const to = Math.min((page + 1) * itemsPerPage, data.length);
+
+  React.useEffect(() => {
+    setPage(0);
+  }, [itemsPerPage]);
+
+  return (
+    <DataTable>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
+        <View style={{ width: 320 }}>
+          <DataTable.Pagination
+            page={page}
+            numberOfPages={Math.ceil(data.length / itemsPerPage)}
+            onPageChange={(page) => setPage(page)}
+            label={`${from + 1}-${to} of ${data.length}`}
+            numberOfItemsPerPageList={numberOfItemsPerPageList}
+            numberOfItemsPerPage={itemsPerPage}
+            onItemsPerPageChange={onItemsPerPageChange}
+            showFastPaginationControls
+            selectPageDropdownLabel={'Rows per page'}
+          />
+        </View>
+      </View>
+
+
+        <DataTable.Header>
+          <DataTable.Title style={{ flex: 0.5 }}>ক্রম</DataTable.Title>
+          <DataTable.Title style={{ flex: 3 }}>শিক্ষার্থীর নাম </DataTable.Title>
+          <DataTable.Title style={{ flex: 1 }}>মোট</DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>১০০%</DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>ভর্তি</DataTable.Title>
+        </DataTable.Header>
+
+      {data.slice(from, to).map((item, index) => (
+        <DataTable.Row 
+            key={item.ref_uid} 
+            onPress={()=>{
+                user?.uid === item.ref_uid || user?.role === 'admin' ? 
+                navigation.navigate('NewStuInfoByTeacher', 
+                  {teaSummery:item, 
+                    stuData:allData.filter(r=>r.ref_uid===item.ref_uid).sort((a,b)=>b.posibility-a.posibility)
+                  })
+                : null
+              }
+            }
+        
+
+        >
+          <DataTable.Cell style={{ flex: 0.5 }}>{index+1}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 3 }}>{item.ref_person}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.total}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.posibility100}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.total_add}</DataTable.Cell>
+        </DataTable.Row>
+      ))}
+
+
+    </DataTable>
+  );
+};

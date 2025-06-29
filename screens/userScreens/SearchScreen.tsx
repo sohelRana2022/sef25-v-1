@@ -10,7 +10,7 @@ import {STDB_API} from '../../apis/config';
 import axios from 'axios';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { Card } from 'react-native-paper';
+import { Card, DataTable } from 'react-native-paper';
 import { useAppContexts } from '../../contexts/AppContext';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
@@ -55,7 +55,6 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
       const res = await axios.post(`${STDB_API}`, reqBody, {
         headers: { 'Content-Type': 'application/json' },
       });
-      console.log(res.data.data)
       if (res.data) {
         setData(res.data.data);
       }
@@ -84,32 +83,6 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
         );
   }, [searchText, data]);
 
-  const renderItem = ({ item }: { item: StudentInfo }) => (
-    <Card style={styles.NewSearchDataCard}>
-      <View style={{ width: '100%', flexDirection: 'row' }}>
-        <View style={{ width: '20%', alignItems: 'center', justifyContent: 'center', padding: 10 }}>
-          <UserIcon name={'user-alt'} color={'rgba(16, 36, 33, 0.6)'} size={50} />
-        </View>
-        <View style={{ width: '80%', alignItems: 'flex-start', justifyContent: 'center', padding: 10 }}>
-          <Text style={styles.cardText}>{`${item.roll}. ${item.stu_name_bn}`}</Text>
-          <Text style={styles.cardText}>{`${item.stu_class} | ${item.section}`}</Text>
-        </View>
-      </View>
-
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', borderTopColor: '#000', borderTopWidth: 2 }}>
-        <TouchableOpacity style={styles.callBtn} activeOpacity={0.5} onPress={() => Linking.openURL(`tel:0${1740096832}`)}>
-          <Icon name={'phone'} color={'rgba(16, 36, 33, 1)'} size={30} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.callBtn} activeOpacity={0.5} onPress={() => console.log('')}>
-          <Icon name={'message1'} color={'rgba(16, 36, 33, 1)'} size={30} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.moreTxt} activeOpacity={0.5} onPress={() => navigation.navigate('StudentDetails', {...route.params, item})}>
-          <Icons name={'information-circle-outline'} size={35} color={'rgba(16, 36, 33, 1)'} />
-        </TouchableOpacity>
-      </View>
-    </Card>
-  );
-  
   return (
     
     <View style={styles.container}>     
@@ -149,16 +122,14 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
           </View> : 
           
-          <FlatList
+
+
+          <StuInfoTable 
             data={searchText=== '' ? data : filteredData}
-            initialNumToRender={50}
-            maxToRenderPerBatch={50}
-            windowSize={10}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-            getItemLayout={(data, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
+            navigation={navigation}
+            route={route}         
           />
+
         }
 
         {loader && (
@@ -248,3 +219,77 @@ const styles = StyleSheet.create({
     backgroundColor:'rgba(0, 0, 0, 0.5)',
   },
 });
+
+
+
+const StuInfoTable = ({
+  data,
+  navigation,
+  route,
+}: {
+  data: StudentInfo[];
+  navigation: NativeStackNavigationProp<any, any>;
+  route: RouteProp<any, any>;
+}) => {
+  const { user } = useAuthContexts();
+  const [page, setPage] = React.useState<number>(0);
+  const [numberOfItemsPerPageList] = React.useState([8,10,12]);
+  const [itemsPerPage, onItemsPerPageChange] = React.useState(
+    numberOfItemsPerPageList[0]
+  );
+
+  const from = page * itemsPerPage;
+  const to = Math.min((page + 1) * itemsPerPage, data.length);
+
+  React.useEffect(() => {
+    setPage(0);
+  }, [itemsPerPage]);
+
+  return (
+    <DataTable>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
+          <View style={{ width: 320 }}>
+            <DataTable.Pagination
+              page={page}
+              numberOfPages={Math.ceil(data.length / itemsPerPage)}
+              onPageChange={(page) => setPage(page)}
+              label={`${from + 1}-${to} of ${data.length}`}
+              numberOfItemsPerPageList={numberOfItemsPerPageList}
+              numberOfItemsPerPage={itemsPerPage}
+              onItemsPerPageChange={onItemsPerPageChange}
+              showFastPaginationControls
+              selectPageDropdownLabel={'Rows per page'}
+            />
+          </View>
+        </View>
+        <DataTable.Header>
+          <DataTable.Title style={{ flex: 0.5 }}>ক্রম</DataTable.Title>
+          <DataTable.Title style={{ flex: 3 }}>শিক্ষার্থীর নাম </DataTable.Title>
+          <DataTable.Title style={{ flex: 1 }}>শ্রেণী </DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>শাখা </DataTable.Title>
+        </DataTable.Header>
+
+      {data.slice(from, to).map((item, index) => (
+        <DataTable.Row 
+        key={index.toString()} 
+        onPress={() => navigation.navigate('StudentDetails', { ...route.params, item })
+          
+        }
+        
+        >
+          <DataTable.Cell style={{ flex: 0.5 }}>{item.roll}</DataTable.Cell>  
+          <DataTable.Cell style={{ flex: 3 }}>
+          <View>
+            <Text className='text-black font-HindSemiBold'>{item.stu_name_bn}</Text>
+            <Text className='text-[#666] text-xs font-HindSemiBold'>{item.father_name_bn}</Text>
+          </View>
+          </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.stu_class}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.section}</DataTable.Cell>
+        </DataTable.Row>
+      ))}
+
+
+    </DataTable>
+  );
+};

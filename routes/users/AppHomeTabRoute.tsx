@@ -4,7 +4,7 @@ import { createBottomTabNavigator, BottomTabBarButtonProps } from '@react-naviga
 import UserHomeScreen from '../../screens/userScreens/UserHomeScreen';
 import Icons from 'react-native-vector-icons/Ionicons';
 import * as Animatable from 'react-native-animatable';
-import Message from '../../screens/userScreens/NewStuInfoByTeacher';
+import Message from '../../screens/newInfoScreens/NewStuInfoByTeacher';
 import AppContextProvider from '../../contexts/AppContext';
 
 const Tab = createBottomTabNavigator();

@@ -7,14 +7,12 @@ import { height } from '../../lib/configs/Dimensions';
 import axios from 'axios';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { Card } from 'react-native-paper';
 import { useAppContexts } from '../../contexts/AppContext';
 import { API_URL } from '../../apis/config';
 import { DataTable } from 'react-native-paper';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import firestore from '@react-native-firebase/firestore';
-const ITEM_HEIGHT = height / 7;
 
 interface NewStuInfoScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -117,37 +115,6 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
     );
   }, [searchText, data]);
 
-  const renderItem = ({ item }: { item: StudentInfo }) => (
-    <Card className="h-30 justify-center items-center p-3 my-2 mx-2 relative">
-      <TouchableOpacity
-        activeOpacity={0.3}
-        onPress={() =>
-          user && (item.ref_person === user.nameBang || user.role === 'admin')
-            ? navigation.navigate('NewStudentDataDetailScreen', { ...route.params, item })
-            : null
-        }
-      >
-        <View className="flex-row pt-3">
-          <View className="w-1/4 flex-column items-center">
-            <UserIcon name="user-alt" color="rgba(16, 36, 33, 0.4)" size={50} />
-            <Text className="text-gray-600 font-HindSemiBold">{`${item.stu_class}`}</Text>
-          </View>
-          <View className="w-3/4">
-            <Text className="text-gray-900 font-HindRegular text-sm">{`নাম: ${item.stu_name_bn}`}</Text>
-            <Text className="text-gray-900 font-HindRegular text-sm">{`পিতার নাম: ${item.father_name}`}</Text>
-            <Text className="text-gray-900 font-HindRegular text-sm">{`ঠিকানা: ${item.address+', '+ item.village}`}</Text>
-          </View>
-        </View>
-        <View className="absolute right-0 top-0">
-          {item.is_admitted ? (
-            <Icon name="checkcircle" size={20} color="#000" />
-          ) : (
-            <Text className="text-gray-900 text-left pt-1 font-HindSemiBold">{`${item.posibility}%`}</Text>
-          )}
-        </View>
-      </TouchableOpacity>
-    </Card>
-  );
 
   return (
     <>
@@ -192,34 +159,12 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
           />
         </View>
       ) : (
-        
-        
-        
-        
+                
        <NewInfoTable
           data={searchText === '' ? data : filteredData}
           navigation={navigation}
           route={route}
         />
-        
-        
-        
-        
-        
-        // <FlatList
-        //   data={searchText === '' ? data : filteredData}
-        //   initialNumToRender={50}
-        //   maxToRenderPerBatch={50}
-        //   windowSize={10}
-        //   renderItem={renderItem}
-        //   keyExtractor={(item) => item.uid.toString()}
-        //   showsVerticalScrollIndicator={false}
-        //   getItemLayout={(data, index) => ({
-        //     length: ITEM_HEIGHT,
-        //     offset: ITEM_HEIGHT * index,
-        //     index,
-        //   })}
-        // />
       )}
     </>
   );
@@ -238,7 +183,7 @@ const NewInfoTable = ({
 }) => {
   const { user } = useAuthContexts();
   const [page, setPage] = React.useState<number>(0);
-  const [numberOfItemsPerPageList] = React.useState([2,4,6,8,10]);
+  const [numberOfItemsPerPageList] = React.useState([8,10,12]);
   const [itemsPerPage, onItemsPerPageChange] = React.useState(
     numberOfItemsPerPageList[0]
   );
@@ -251,24 +196,22 @@ const NewInfoTable = ({
   }, [itemsPerPage]);
 
   return (
-    <DataTable
-      
-    >
-<View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
-  <View style={{ width: 320 }}>
-    <DataTable.Pagination
-      page={page}
-      numberOfPages={Math.ceil(data.length / itemsPerPage)}
-      onPageChange={(page) => setPage(page)}
-      label={`${from + 1}-${to} of ${data.length}`}
-      numberOfItemsPerPageList={numberOfItemsPerPageList}
-      numberOfItemsPerPage={itemsPerPage}
-      onItemsPerPageChange={onItemsPerPageChange}
-      showFastPaginationControls
-      selectPageDropdownLabel={'Rows per page'}
-    />
-  </View>
-</View>
+    <DataTable>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
+        <View style={{ width: 320 }}>
+          <DataTable.Pagination
+            page={page}
+            numberOfPages={Math.ceil(data.length / itemsPerPage)}
+            onPageChange={(page) => setPage(page)}
+            label={`${from + 1}-${to} of ${data.length}`}
+            numberOfItemsPerPageList={numberOfItemsPerPageList}
+            numberOfItemsPerPage={itemsPerPage}
+            onItemsPerPageChange={onItemsPerPageChange}
+            showFastPaginationControls
+            selectPageDropdownLabel={'Rows per page'}
+          />
+        </View>
+      </View>
 
 
         <DataTable.Header>

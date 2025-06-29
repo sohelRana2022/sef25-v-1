@@ -8,7 +8,9 @@ import {
   Alert,
   StyleSheet,
   Keyboard,
+  TouchableOpacity,
 } from 'react-native';
+import { Card } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/AntDesign';
@@ -17,14 +19,14 @@ interface NewStuInfoByTeacherProps{
   route: RouteProp<any, any>;
 }
 
-import { Card } from 'react-native-paper';
-
 
 const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
   const {navigation, route} = props;
-  const teaCollection = route?.params?.teaData;
+  const teaSummery = route?.params?.teaSummery;
+  const stuData = route?.params?.stuData;
+  const {ref_person, total_add, total, admitted, posibility100} = teaSummery;
 
-  const {ref_person, total_add, total, admitted, posibility100} = route?.params?.item;
+  console.log(teaSummery.ref_person)
   return (
     <View style={styles.container}>
       
@@ -64,14 +66,17 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
               </View>
 
             <ScrollView>
-              {teaCollection.map((item: { uid: string; is_admitted:string, stu_name_bn: string; posibility: string }, idx: number) => (
+              {stuData.map((item: { uid: string; is_admitted:string, stu_name_bn: string; posibility: string }, idx: number) => (
+                
                 <View key={item.uid} style={[styles.infoRow,{backgroundColor: item.is_admitted ? '#eee' : '#FFF'}]}>
                   <Text style={[styles.serial,{fontFamily: 'HindSiliguri-Regular'}]}>{idx + 1}</Text>
                   <Text style={[styles.label,{fontFamily: 'HindSiliguri-Regular'}]}>{item.stu_name_bn}</Text>
                   <Text style={[styles.value,{fontFamily: 'HindSiliguri-Regular'}]}>{item.posibility+"%"}</Text>
                   {item.is_admitted ? <Icon name="check" size={24} color="green" style={styles.icon} /> 
                   : 
-                  <Text style={styles.icon}>{""}</Text>}
+                      <Icon name="close" size={24} color="green" style={styles.icon} /> 
+                 
+                  }
                 </View>
               ))}
             </ScrollView>

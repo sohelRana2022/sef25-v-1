@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { getJsonDatafromAsyncStorage } from '../../lib/helpers/localStorageFuncs';
 import { authStackInfo } from '../../lib/dTypes/routeDataType';
 import MyStudentsRoute from '../MyStudents/MyStudentsRoute';
-import StatisticsScreen from '../../screens/userScreens/StatisticsScreen';
+import StatisticsScreen from '../../screens/newInfoScreens/StatisticsScreen';
 import AddNewStudent from '../../screens/newInfoScreens/AddNewStudent';
 import AppContextProvider from '../../contexts/AppContext';
 import GetResultPrimary from '../../screens/markEntry/GetResultPrimary';
@@ -16,7 +16,7 @@ import GetMarkSubWise from '../../screens/markEntry/CheckMarkSubjectWise';
 import ResultSheetPrimary from '../../screens/markEntry/ResultSheetPrimary';
 import SendMarkScreen from '../../screens/markEntry/SendMarkScreen';
 import UserHomeScreen from '../../screens/userScreens/UserHomeScreen';
-import NewStuInfoByTeacher from '../../screens/userScreens/NewStuInfoByTeacher';
+import NewStuInfoByTeacher from '../../screens/newInfoScreens/NewStuInfoByTeacher';
 
 const Stack = createStackNavigator();
 
