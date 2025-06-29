@@ -57,7 +57,7 @@ const AdmissionContextProvider: React.FC<AdmissionContextProviderProps> = ({ chi
 
     const onSubmitAll = async (extraDta:extraDataType)=>{
         
-        const timestamp = new Date().toISOString();
+        const timestamp = new Date();
         setExtraData(extraDta);
         const allAdmissionData: AdmissionDataType = {
             ...(personalInfo as PersonalInfoType),
@@ -67,8 +67,11 @@ const AdmissionContextProvider: React.FC<AdmissionContextProviderProps> = ({ chi
                 
         const docRef = firestore().collection('newinfos').doc(); // generate document reference with ID
         await docRef.set({ ...allAdmissionData, add_date: timestamp, is_admitted: false });
-        return {status: true, message: 'New admission saved with ID: '+docRef.id}; // Return true on successful registration
-
+        if(docRef.id){
+            return {status: true, message: 'অভিনন্দন! আপনার তথ্য জমা হয়েছে ।'}; // Return true on successful registration
+        }else{
+            return {status: false, message: 'Ops! Data not sent!'};
+        }
     }
 
     return (

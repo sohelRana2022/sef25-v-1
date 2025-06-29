@@ -43,7 +43,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     <View style={{ flex: 1, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }}>
       {loader && (
         <View style={styles.loaderOverlay}>
-          <ActivityIndicator size="large" color="#000" />
+          <ActivityIndicator size="large" color="#FFF" />
           <Text className='text-base font-HindRegular text-[#FFF] pt-5'>অপেক্ষা করুন .....!</Text>
         </View>
       )}

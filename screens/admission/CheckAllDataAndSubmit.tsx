@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, ActivityIndicator } from 'react-native';
 import { useAdmissionContexts } from '../../contexts/AdmissionContext';
-import { Button, Card } from 'react-native-paper';
+import { Button, Card, Snackbar } from 'react-native-paper';
 import { theme } from '../../lib/themes/theme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -9,22 +9,34 @@ import { extraDataSchema, extraDataType } from '../../lib/zodschemas/zodSchemas'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthContexts } from '../../contexts/AuthContext';
+import Icon from 'react-native-vector-icons/Feather';
 type CheckAllDataAndSubmitProps = {
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
 }
 
 const CheckAllDataAndSubmit:React.FC<CheckAllDataAndSubmitProps> = ({ navigation}) => {
-const {user} = useAuthContexts();
+  const [success, setSuccess] = React.useState(false);
+  const [msg, setMsg] = React.useState<string>('');
+  const {user} = useAuthContexts();
 
 const {loader, setLoader, personalInfo, parentsAndContactInfo, onSubmitAll, resetForm } = useAdmissionContexts();
 const { handleSubmit, reset } = useForm<extraDataType>({
   resolver: zodResolver(extraDataSchema),
   defaultValues: {
-    ref_person: user?.nameBang, 
-    sef_branch: user?.branch
-  }
+    ref_uid: user?.uid || '',
+    ref_person: user?.nameBang || '', 
+    sef_branch: user?.branch || '',
+    add_point: 0
+    }
 });
+
+
+const goAddHome = () => {
+  setSuccess(false);
+  navigation.navigate('AdmissionHome')
+}
+
 const submit = async (data:extraDataType) =>{
   setLoader(true);
   const submitStatus: {status: boolean, message: string} = await onSubmitAll(data);
@@ -32,14 +44,29 @@ const submit = async (data:extraDataType) =>{
     reset();
     resetForm();
     setLoader(false);
-    navigation.navigate('AdmissionHome');
-  }else{ 
-    Alert.alert('Failed to submit the application!')
+    setMsg(submitStatus.message);
+    setSuccess(true)
+  
+  }else{
+    setMsg(submitStatus.message);
+    setSuccess(true);
   }
 }
 return (
 <ScrollView>
     <View style={styles.container}>
+        {!!success && (
+          <View style={styles.msgWrapper}>
+            <Icon name="check-square" size={60} color="green" />
+            <Text style={styles.msgText}>
+              {msg}
+            </Text>
+            <Button style={{height:40, marginTop:20 }} onPress={()=>goAddHome()} mode={"contained"}>
+              আরেকটি তথ্য পাঠাবো 
+            </Button>
+          </View>
+        )}
+
 
         {loader && (
           <View style={styles.loaderOverlay}>
@@ -165,5 +192,24 @@ const styles = StyleSheet.create({
     zIndex:100,
     borderRadius:10
   },
+  msgWrapper: {
+    backgroundColor:'#ddd', 
+    position: 'absolute', 
+    height:'100%',
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    zIndex: 1000 
+  },
+  msgText: {  
+    borderRadius: 8, 
+    textAlign: 'center', 
+    color:'#000', 
+    padding:15,
+    fontFamily:'HindSiliguri-SemiBold',
+    fontSize:16
+  }
 });
 

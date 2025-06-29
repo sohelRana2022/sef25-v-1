@@ -24,7 +24,7 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
   const {navigation, route} = props;
   const teaCollection = route?.params?.teaData;
 
-  const {ref_person, total, admitted, posibility100} = route?.params?.item;
+  const {ref_person, total_add, total, admitted, posibility100} = route?.params?.item;
   return (
     <View style={styles.container}>
       
@@ -39,7 +39,7 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
                 </View>
                  <View style={{flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center', padding:10}}>
                   <Icon name="Trophy" size={18} color="#444" />
-                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{admitted}</Text>
+                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{total_add}</Text>
                 </View>                
                 <View style={{flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center', padding:10}}>
                   <Icon name="heart" size={18} color="#444" />
@@ -47,11 +47,11 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
                 </View>                
                 <View style={{flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center', padding:10}}>
                   <Icon name={admitted <= 5 ? "download" : "upload"} size={18} color="#444" />
-                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{admitted-5}</Text>
+                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{total_add-5}</Text>
                 </View>                 
                 <View style={{flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center', padding:10}}>
                   <Icon name="gift" size={18} color="#444" />
-                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{admitted*100}</Text>
+                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{total_add*100}</Text>
                 </View>            
               </View>
 
@@ -90,7 +90,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginHorizontal:5
+    marginHorizontal:5,
+    marginVertical:10
+
   },
   card: {
     width: '100%',

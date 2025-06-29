@@ -10,6 +10,7 @@ import { RouteProp } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
 import { useAppContexts } from '../../contexts/AppContext';
 import { API_URL } from '../../apis/config';
+import { DataTable } from 'react-native-paper';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import firestore from '@react-native-firebase/firestore';
@@ -21,6 +22,7 @@ interface NewStuInfoScreenProps {
 }
 
 interface StudentInfo {
+    ref_uid: string,
     uid: string,
     stu_name_bn: string,
     stu_name_eng: string,
@@ -37,10 +39,11 @@ interface StudentInfo {
     village: string,
     ref_person: string,
     sef_branch: string,
-
+    add_point: number;
     is_admitted : boolean,
-    add_date: string, 
+    add_date: string
 }
+
 const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }) => {
   const { user } = useAuthContexts();
   const [netStatus, setNetStatus] = useState(false);
@@ -51,20 +54,22 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
   const getData = async () => {
     setLoader(true);
     try {
-        const currentYear = new Date().getFullYear();
-        // start and end date string বানাও (ISO string)
-        const startDateStr = `${currentYear}-01-01T00:00:00.000Z`;
-        const endDateStr = `${currentYear}-12-31T23:59:59.999Z`;
+        const currentYear = new Date().getFullYear(); // 2025
+
+        const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
 
         const snapshot = await firestore()
           .collection('newinfos')
-          .where('add_date', '>=', startDateStr)
-          .where('add_date', '<=', endDateStr)
+          .where('add_date', '>=', startOfYear)
           .get();
 
         const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
             const data = doc.data();
+            const timestamp = data.add_date; // Firestore Timestamp
+            const jsDate = timestamp.toDate().toString(); // JavaScript Date object
+
               return {
+                ref_uid: data.ref_uid,
                 uid: doc.id,
                 stu_name_bn: data.stu_name_bn,
                 stu_name_eng: data.stu_name_eng,
@@ -82,21 +87,25 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
                 ref_person: data.ref_person,
                 sef_branch: data.sef_branch,
                 is_admitted: data.is_admitted,
-                add_date: data.add_date,
+                add_date: jsDate,
+                add_point: data.add_point
               };
           });
 
-        setData(newStuData);
+       setData(newStuData);
     } catch (err) {
       setNetStatus(true);
     } finally {
       setLoader(false);
+      setNetStatus(false);
     }
   };
 
   useEffect(() => {
     getData();
   }, []);
+
+
 
   const filteredData = useMemo(() => {
     if (!Array.isArray(data)) return [];
@@ -183,23 +192,113 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
           />
         </View>
       ) : (
-        <FlatList
+        
+        
+        
+        
+       <NewInfoTable
           data={searchText === '' ? data : filteredData}
-          initialNumToRender={50}
-          maxToRenderPerBatch={50}
-          windowSize={10}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.uid.toString()}
-          showsVerticalScrollIndicator={false}
-          getItemLayout={(data, index) => ({
-            length: ITEM_HEIGHT,
-            offset: ITEM_HEIGHT * index,
-            index,
-          })}
+          navigation={navigation}
+          route={route}
         />
+        
+        
+        
+        
+        
+        // <FlatList
+        //   data={searchText === '' ? data : filteredData}
+        //   initialNumToRender={50}
+        //   maxToRenderPerBatch={50}
+        //   windowSize={10}
+        //   renderItem={renderItem}
+        //   keyExtractor={(item) => item.uid.toString()}
+        //   showsVerticalScrollIndicator={false}
+        //   getItemLayout={(data, index) => ({
+        //     length: ITEM_HEIGHT,
+        //     offset: ITEM_HEIGHT * index,
+        //     index,
+        //   })}
+        // />
       )}
     </>
   );
 };
 
 export default NewStuInfoScreen;
+
+const NewInfoTable = ({
+  data,
+  navigation,
+  route,
+}: {
+  data: StudentInfo[];
+  navigation: NativeStackNavigationProp<any, any>;
+  route: RouteProp<any, any>;
+}) => {
+  const { user } = useAuthContexts();
+  const [page, setPage] = React.useState<number>(0);
+  const [numberOfItemsPerPageList] = React.useState([2,4,6,8,10]);
+  const [itemsPerPage, onItemsPerPageChange] = React.useState(
+    numberOfItemsPerPageList[0]
+  );
+
+  const from = page * itemsPerPage;
+  const to = Math.min((page + 1) * itemsPerPage, data.length);
+
+  React.useEffect(() => {
+    setPage(0);
+  }, [itemsPerPage]);
+
+  return (
+    <DataTable
+      
+    >
+<View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
+  <View style={{ width: 320 }}>
+    <DataTable.Pagination
+      page={page}
+      numberOfPages={Math.ceil(data.length / itemsPerPage)}
+      onPageChange={(page) => setPage(page)}
+      label={`${from + 1}-${to} of ${data.length}`}
+      numberOfItemsPerPageList={numberOfItemsPerPageList}
+      numberOfItemsPerPage={itemsPerPage}
+      onItemsPerPageChange={onItemsPerPageChange}
+      showFastPaginationControls
+      selectPageDropdownLabel={'Rows per page'}
+    />
+  </View>
+</View>
+
+
+        <DataTable.Header>
+          <DataTable.Title style={{ flex: 0.5 }}>ক্রম</DataTable.Title>
+          <DataTable.Title style={{ flex: 3 }}>শিক্ষার্থীর নাম </DataTable.Title>
+          <DataTable.Title style={{ flex: 1 }}>শ্রেণী </DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>সম্ভাবনা </DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>ভর্তি</DataTable.Title>
+        </DataTable.Header>
+
+      {data.slice(from, to).map((item, index) => (
+        <DataTable.Row 
+        key={item.uid} 
+          onPress={() =>
+          user && (item.ref_person === user.nameBang || user.role === 'admin')
+            ? navigation.navigate('NewStudentDataDetailScreen', { ...route.params, item })
+            : null
+        }
+        
+        >
+          <DataTable.Cell style={{ flex: 0.5 }}>{index+1}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 3 }}>{item.stu_name_bn}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.stu_class}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.posibility+'%'}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>{item.is_admitted?'Yes':'No'}</DataTable.Cell>
+        </DataTable.Row>
+      ))}
+
+
+    </DataTable>
+  );
+};
+

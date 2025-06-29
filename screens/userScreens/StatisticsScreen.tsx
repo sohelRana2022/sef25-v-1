@@ -19,6 +19,7 @@ interface StatisticsScreenProps{
 
 
 interface StudentInfo {
+    ref_uid: string,
     uid: string,
     stu_name_bn: string,
     stu_name_eng: string,
@@ -35,35 +36,39 @@ interface StudentInfo {
     village: string,
     ref_person: string,
     sef_branch: string,
-
+    add_point: number;
     is_admitted : boolean,
     add_date: string, 
 }
 
 type Summary = {
+  ref_uid: string;
   ref_person: string;
   total: number;
   admitted: number;
   posibility100: number;
+  total_add: number;
 };
 
 const summarizeByRefPerson = (data: StudentInfo[]): Summary[] => {
   const grouped = data.reduce<Record<string, Summary>>((acc, curr) => {
     const person = curr.ref_person || 'Unknown';
-
-    if (!acc[person]) {
-      acc[person] = {
+    const ref_uid = curr.ref_uid || 'Unknown';
+    if (!acc[ref_uid]) {
+      acc[ref_uid] = {
         ref_person: person,
+        ref_uid: ref_uid,
         total: 0,
         admitted: 0,
         posibility100: 0,
+        total_add: 0
       };
     }
 
-    acc[person].total += 1;
-    if (curr.is_admitted) acc[person].admitted += 1;
-    if (Number(curr.posibility) === 100) acc[person].posibility100 += 1;
-
+    acc[ref_uid].total += 1;
+    if (curr.is_admitted) acc[ref_uid].admitted += 1;
+    if (Number(curr.posibility) === 100) acc[ref_uid].posibility100 += 1;
+    acc[ref_uid].total_add += Number(curr.add_point || 0); // add_point যোগ
     return acc;
   }, {});
 
@@ -91,14 +96,15 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
         </Card>
       )
   }
-  const renderItem = ({ item, index }: { item: { ref_person: string, total: number, admitted: number, posibility100: number }, index: number })=>{
+  const renderItem = ({ item, index }: { item: {ref_uid: string, ref_person: string, total_add: number, total: number, admitted: number, posibility100: number }, index: number })=>{
     return (
       <Card className='flex-1 px-1 py-1 mx-2 my-0.5 justify-center items-center'>
           <TouchableOpacity
             onPress={()=>{
-                user?.nameBang === item.ref_person || user?.role === 'admin' ? 
+              console.log(user?.uid + '     ' + item.ref_uid)
+                user?.uid === item.ref_uid || user?.role === 'admin' ? 
                 navigation.navigate('NewStuInfoByTeacher', 
-                  {teaData:data.filter(r=>r.ref_person===item.ref_person).sort((a,b)=>b.posibility-a.posibility), item})
+                  {teaData:data.filter(r=>r.ref_uid===item.ref_uid).sort((a,b)=>b.posibility-a.posibility), item})
                 : null
               }
               
@@ -115,7 +121,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
             <Text className='w-[40%] text-gray-900 font-HindLight text-left text-base'>{`${item.ref_person}`}</Text>
             <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.total}`}</Text>
             <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.posibility100}`}</Text>
-            <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.admitted}`}</Text>
+            <Text className='w-[15%] text-gray-900 font-HindLight text-center text-base'>{`${item.total_add}`}</Text>
           </View>
           </TouchableOpacity>
       </Card>
@@ -125,15 +131,13 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
   const getChartData = async () => {
     setLoader(true);
     try {
-       const currentYear = new Date().getFullYear();
-        // start and end date string বানাও (ISO string)
-        const startDateStr = `${currentYear}-01-01T00:00:00.000Z`;
-        const endDateStr = `${currentYear}-12-31T23:59:59.999Z`;
+        const currentYear = new Date().getFullYear(); // 2025
+
+        const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
 
         const snapshot = await firestore()
           .collection('newinfos')
-          .where('add_date', '>=', startDateStr)
-          .where('add_date', '<=', endDateStr)
+          .where('add_date', '>=', startOfYear)
           .get();
 
         const newStuData = snapshot.docs.map(doc => {
@@ -153,10 +157,12 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
                 contact_2: data.contact_2,
                 address: data.address,
                 village: data.village,
+                ref_uid: data.ref_uid,
                 ref_person: data.ref_person,
                 sef_branch: data.sef_branch,
                 is_admitted: data.is_admitted,
                 add_date: data.add_date,
+                add_point: data.add_point
               };
           });
         setData(newStuData);

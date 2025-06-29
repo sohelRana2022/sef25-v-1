@@ -24,6 +24,7 @@ export type UserInfoType = z.infer<typeof UserInfoSchema>
 
 //creating user Schema from server
 export const userFromServerSchema = z.object({
+    uid: z.string(),
     nameBang: z.string(),
     nameEng: z.string(),
     contact: z.string(),
@@ -52,18 +53,24 @@ export type LoginInfoType = z.infer<typeof LoginInfoSchema>
 
 // creating a schema for personal info form
 export const PersonalInfoSchemama = z.object({
-    stu_name_bn: z.string()
-    .min(1, {message:'শিক্ষার্থীর বাংলা পূর্ণনাম অবশ্যই দিতে হবে। '})
+    stu_name_bn: z.string().trim()
+    .nonempty({message:'শিক্ষার্থীর বাংলা পূর্ণনাম অবশ্যই দিতে হবে। '})
     .regex(/^[\u0980-\u09FF\s.]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে শিক্ষার্থীর নাম লিখতে হবে।' }),
-    stu_name_eng: z.string()
-    .min(1, {message:'শিক্ষার্থীর ইংরেজি পূর্ণনাম অবশ্যই দিতে হবে। '})
-    .regex(/^[A-Za-z\s.]+$/, { message: 'শুধুমাত্র ইংরেজি অক্ষরে শিক্ষার্থীর নাম লিখতে হবে।' }),
+    stu_name_eng: z.string().trim()
+    .nonempty({message:'শিক্ষার্থীর ইংরেজি পূর্ণনাম অবশ্যই দিতে হবে। '})
+    .regex(/^[A-Za-z\s.]+$/, { message: 'শুধুমাত্র ইংরেজি অক্ষরে শিক্ষার্থীর নাম লিখতে হবে।' })
+    .transform(value =>
+    value
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+    ),
     stu_class: z.string().min(1, {message:'এই তথ্যটি বাধ্যতামূলক। '}),
     stu_gender: z.string().min(1, {message:'এই তথ্যটি বাধ্যতামূলক। '}),
     stu_religion: z.string().min(1, {message:'এই তথ্যটি বাধ্যতামূলক। '}),
-    prev_school: z.string()
-    .min(1, {message:"শিক্ষার্থীর পূর্বের বিদ্যালয়ের নাম অবশ্যই দিতে হবে। প্রি-প্লে ও প্লে শ্রেণীর জন্য 'প্রযোজ্য নয়' লিখতে হবে । "})
-    .regex(/^[\u0980-\u09FF\s.]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে শিক্ষার্থীর পূর্বের বিদ্যালয়ের নাম লিখতে হবে।' }),
+    prev_school: z.string().trim()
+    .nonempty({message:"শিক্ষার্থীর পূর্বের বিদ্যালয়ের নাম অবশ্যই দিতে হবে। প্রি-প্লে ও প্লে শ্রেণীর জন্য 'প্রযোজ্য নয়' লিখতে হবে । "})
+    .regex(/^[\u0980-\u09FF\s.,।]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে শিক্ষার্থীর পূর্বের বিদ্যালয়ের নাম লিখতে হবে।' }),
     posibility: z.string().min(1, {message:'এই তথ্যটি বাধ্যতামূলক। '})
   });
 
@@ -71,12 +78,12 @@ export type PersonalInfoType = z.infer<typeof PersonalInfoSchemama>
 
 // creating a schema for Academic info form
 export const ParentsAndContactInfoSchemama = z.object({
-  father_name: z.string()
-  .min(1, { message: 'পিতার নাম অবশ্যই প্রদান করতে হবে।' })
+  father_name: z.string().trim()
+  .nonempty({ message: 'পিতার নাম অবশ্যই প্রদান করতে হবে।' })
   .regex(/^[\u0980-\u09FF\s.]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে পিতার নাম লিখতে হবে।' }),
 
-  mother_name: z.string()
-  .min(1, {message:'মাতার বাংলা পূর্ণনাম অবশ্যক!'})
+  mother_name: z.string().trim()
+  .nonempty({message:'মাতার বাংলা পূর্ণনাম অবশ্যক!'})
   .regex(/^[\u0980-\u09FF\s.]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে মাতার নাম লিখতে হবে।' }),
 
   contact_1: z.string()
@@ -87,9 +94,9 @@ export const ParentsAndContactInfoSchemama = z.object({
   .min(1, {message:'মাতার মোবাইল নাম্বার অবশ্যক!'})
   .regex(/(^(01){1}[3-9]{1}(\d){8})$/,{message:'মোবাইল নাম্বারটি সঠিক নয়!'}),
 
-  address: z.string()
-  .min(1, {message:'বাসার ঠিকানা বিস্তারিত অবশ্যক!'})
-  .regex(/^[\u0980-\u09FF\s.]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে বাসার ঠিকানা বিস্তারিত লিখতে হবে।' }),
+  address: z.string().trim()
+  .nonempty({message:'বাসার ঠিকানা বিস্তারিত অবশ্যক!'})
+  .regex(/^[\u0980-\u09FF\s.,।]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে বাসার ঠিকানা বিস্তারিত লিখতে হবে।' }),
 
   village: z.string({message:'ঠিকানা বাছাই করা আবশ্যক!'})
 });
@@ -97,8 +104,10 @@ export const ParentsAndContactInfoSchemama = z.object({
 export type ParentsAndContactInfoType = z.infer<typeof ParentsAndContactInfoSchemama>
 
 export const extraDataSchema = z.object({
+  ref_uid: z.string(),
   ref_person: z.string(),
-  sef_branch: z.string()
+  sef_branch: z.string(),
+  add_point: z.number().max(1)
 })
 export type extraDataType = z.infer<typeof extraDataSchema>
 
