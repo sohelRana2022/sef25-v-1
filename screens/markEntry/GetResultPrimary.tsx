@@ -20,7 +20,9 @@ import { Mark_API } from '../../apis/config';
 import ErrMsg from '../../comps/Messages/ErrMsg';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { width, height } from '../../lib/configs/Dimensions';
 
+const ITEM_HEIGHT = height / 3;
 export type ResultDataType = {
  finalResult: {
     FSE10percent: number;
@@ -86,6 +88,7 @@ const GetResultPrimary: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
   const { loader, setLoader } = useAppContexts();
   const [netStatus, setNetStatus] = useState(true);
   const { user } = useAuthContexts();
+ 
   const classMap = {
     "Play":"প্লে",
     "Nursery":"নার্সারি",
@@ -140,17 +143,22 @@ const GetResultPrimary: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
  
 const StudentCard = ({ item }: { item: typeof resultData[0] }) => {
    return (
+    <Card style={styles.card}>
     <TouchableOpacity
+        style={{position:'absolute', right:15, bottom:-20}}
         onPress={() =>
           user && (user.role === 'editor' || user.role === 'admin')
             ? navigation.navigate('ResultSheetPrimary', { ...route.params, item })
             : null
         }
     >
+      <Text className='text-blue-500 border-b border-blue-500 font-HindSemiBold text-xs'>সম্পূর্ণ কার্ড প্রদর্শন</Text>
+    </TouchableOpacity>
 
     
-    <Card style={styles.card}>
+    
       <Card.Content>
+        <Text className='text-black border-b border-gray-200 w-[100] self-center  text-center text-base font-HindSemiBold'>{'রেজাল্ট কার্ড'}</Text>
 
         {([
             [1, 'রোল নং', item.sif.roll],
@@ -168,17 +176,17 @@ const StudentCard = ({ item }: { item: typeof resultData[0] }) => {
             ))}
       </Card.Content>
     </Card>
-    </TouchableOpacity>
+    
   );
 };
 
   return (
-    <View style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
-      <Card style={{ width: '90%', padding: 20 }}>
+    <View style={{flex:1, justifyContent: 'center', alignItems: 'center' }}>
+      <View className='w-[100%] px-[25] py-[15] border-b border-2 border-gray-400 bg-white'>
           {fetchError && (
             <ErrMsg errText={fetchError} hideAfter={3000} fontFamily={'HindSiliguri-Light'}/>
           )}
-        <Card.Content>
+     
 
 
           <CustomPicker control={control} data={examData} name="examName" pickerTitle="পরীক্ষার নাম" />
@@ -189,22 +197,25 @@ const StudentCard = ({ item }: { item: typeof resultData[0] }) => {
             pickerTitle="পরীক্ষার সাল"
             onSelect={() => handleSubmit(getResult)()}
           />
-        </Card.Content>
-      </Card>
+
+      </View>
+     
       {loader && (
         <View style={styles.loaderOverlay}>
-          <ActivityIndicator size="large" color="#6200ee" />
+          <ActivityIndicator size="large" color="#666" />
           <Text className='text-base text-[#666] pt-5'>Wait! data loading .....</Text>
         </View>
       )}
 
+    
       <FlatList
         data={resultData}
-        horizontal={false}
         keyExtractor={(item) => item.sif.stuId.toString()}
         renderItem={({ item }) => <StudentCard item={item} />}
-        contentContainerStyle={{ width:'90%' }}
+        contentContainerStyle={{ paddingBottom: 10 }}
+        showsVerticalScrollIndicator={false}
       />
+
     </View>
     
   );
@@ -218,11 +229,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   }, 
   card: {
-    marginVertical: 5,
+    margin: 5,
     backgroundColor: '#FFF',
     borderRadius: 10,
-    width: '100%', 
-    paddingHorizontal: 20
+    width: width*0.9,
+    height: ITEM_HEIGHT, 
+    paddingHorizontal: 20,
+    justifyContent:'center',
+    alignItems:'center'
+    
   },
   logo: {
     width: 200,
@@ -269,7 +284,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 2,
     borderBottomWidth: 1,
     borderColor: '#eee'
   },

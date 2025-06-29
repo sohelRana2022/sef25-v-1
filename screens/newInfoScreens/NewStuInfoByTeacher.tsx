@@ -74,7 +74,7 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
                   <Text style={[styles.value,{fontFamily: 'HindSiliguri-Regular'}]}>{item.posibility+"%"}</Text>
                   {item.is_admitted ? <Icon name="check" size={24} color="green" style={styles.icon} /> 
                   : 
-                      <Icon name="close" size={24} color="green" style={styles.icon} /> 
+                      <Icon name="close" size={24} color="red" style={styles.icon} /> 
                  
                   }
                 </View>

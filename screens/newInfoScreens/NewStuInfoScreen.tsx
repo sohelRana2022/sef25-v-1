@@ -59,6 +59,7 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
         const snapshot = await firestore()
           .collection('newinfos')
           .where('add_date', '>=', startOfYear)
+          .orderBy('add_date', 'desc')
           .get();
 
         const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
@@ -219,11 +220,12 @@ const NewInfoTable = ({
           <DataTable.Title style={{ flex: 3 }}>শিক্ষার্থীর নাম </DataTable.Title>
           <DataTable.Title style={{ flex: 1 }}>শ্রেণী </DataTable.Title>
           <DataTable.Title style={{ flex: 1}}>সম্ভাবনা </DataTable.Title>
-          <DataTable.Title style={{ flex: 1}}>ভর্তি</DataTable.Title>
+          <DataTable.Title style={{ flex: 0.5}}>ভর্তি</DataTable.Title>
         </DataTable.Header>
 
       {data.slice(from, to).map((item, index) => (
-        <DataTable.Row 
+        <DataTable.Row
+        style={{backgroundColor: index % 2 === 0 ? '#FFF' : '#eee'}} 
         key={item.uid} 
           onPress={() =>
           user && (item.ref_person === user.nameBang || user.role === 'admin')
@@ -233,13 +235,21 @@ const NewInfoTable = ({
         
         >
           <DataTable.Cell style={{ flex: 0.5 }}>{index+1}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 3 }}>{item.stu_name_bn}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 3}}>
+           <View>
+             <Text className='text-sm text-black font-HindSemiBold'>{item.stu_name_bn}</Text>
+            <Text className='text-xs text-gray-400 font-HindSemiBold'>{item.ref_person}</Text>
+           </View>
+            
+            </DataTable.Cell>
           <DataTable.Cell style={{ flex: 1 }}>{item.stu_class}</DataTable.Cell>
           <DataTable.Cell style={{ flex: 1 }}>{item.posibility+'%'}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>{item.is_admitted?'Yes':'No'}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 0.5 }}>{item.is_admitted ? 
+            <Icon name="check" size={24} color="green" style={{width:'100%', textAlign:'center'}} /> :
+            <Icon name="close" size={24} color="red" style={{width:'100%', textAlign:'center'}} /> }
+          </DataTable.Cell>
         </DataTable.Row>
       ))}
-
 
     </DataTable>
   );
