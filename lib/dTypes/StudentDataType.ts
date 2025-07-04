@@ -1,5 +1,6 @@
 import { examYear } from './../jsonValue/PickerData';
 export type studentDataType = {
+    ref_uid:string,
     uid: string,
     stu_name_bn: string,
     stu_name_eng: string,
@@ -17,7 +18,12 @@ export type studentDataType = {
     ref_person: string,
     sef_branch: string,
     is_admitted : boolean,
-    add_date: string, 
+    is_active: boolean,
+    valid_days: number,
+    send_date: string,
+    add_point: number,
+    commission: number,
+    total_add_fee: number
   }
 
   export type resultDataType = {

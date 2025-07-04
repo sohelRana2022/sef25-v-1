@@ -1,4 +1,4 @@
-import { Timestamp } from "@react-native-firebase/firestore";
+
 import { z } from "zod";
 
 // creating a schema for signup form
@@ -96,7 +96,7 @@ export const ParentsAndContactInfoSchemama = z.object({
 
   address: z.string().trim()
   .nonempty({message:'বাসার ঠিকানা বিস্তারিত অবশ্যক!'})
-  .regex(/^[\u0980-\u09FF\s.,।]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে বাসার ঠিকানা বিস্তারিত লিখতে হবে।' }),
+  .regex(/^[\u0980-\u09FF\s\-\/\.,]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে বাসার ঠিকানা বিস্তারিত লিখতে হবে।' }),
 
   village: z.string({message:'ঠিকানা বাছাই করা আবশ্যক!'})
 });
@@ -250,4 +250,26 @@ export const markSchema = z.object({
   )
 });
 
-type markData = z.infer<typeof markSchema>;
+export type markData = z.infer<typeof markSchema>;
+
+
+export const addInfoSchema = z.object({
+  total_add_fee: z.preprocess((val) => {
+    if (typeof val === 'string' && val.trim() === '') return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number({ required_error: "সর্বমোট ভর্তি-ফি প্রয়োজন" }).min(1, "সর্বমোট ভর্তি-ফি অবশ্যই ১ বা তার বেশি হতে হবে")),
+
+  add_point: z.preprocess((val) => {
+    if (typeof val === 'string' && val.trim() === '') return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number({ required_error: "অবদান সংখ্যা প্রয়োজন" }).min(1, "অবদান সংখ্যা অবশ্যই ১ বা তার বেশি হতে হবে")),
+
+  commission: z.number(),
+  is_admitted: z.boolean(),
+  add_date: z.date()
+});
+
+
+export type addInfoType = z.infer<typeof addInfoSchema>;

@@ -39,7 +39,8 @@ import {
   newStuDataManagement,
   resultManagementHigh,
   resultManagementPrimary,
-  studentManagement
+  studentManagement,
+  UserManagement
 } from '../../lib/jsonValue/MenuData';
 
 interface slidersType {
@@ -136,12 +137,14 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
     getSliders();
   }, []);
 
+//UserManagement
   const menuBlocks: MenuBlockType[] = user?.isApproved
     ? [
         {id:1, title: 'আমার শিক্ষার্থী', data: studentManagement },
-        {id:2, title: 'নতুন শিক্ষার্থী', data: newStuDataManagement },
-        ...(isPrimary || user.role == 'admin' ? [{id:3, title: 'ডাউনলোড', data:  resultManagementPrimary}] : []),
-        ...(isHigh || user.role == 'admin' ? [{id:4, title: 'ফলাফল', data: resultManagementHigh }] : [])
+      ...(user.role == 'admin' ? [{id:2, title: 'ব্যবহারকারী নিয়ন্ত্রণ', data: UserManagement }] : []),
+        {id:3, title: 'নতুন শিক্ষার্থী', data: newStuDataManagement },
+      ...((isPrimary || user.role == 'admin') ? [{id:4, title: 'ডাউনলোড', data:  resultManagementPrimary}] : []),
+      ...((isHigh || user.role == 'admin') ? [{id:5, title: 'ফলাফল', data: resultManagementHigh }] : []),
       ]
     : [];
 

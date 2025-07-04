@@ -24,14 +24,11 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
   const {navigation, route} = props;
   const teaSummery = route?.params?.teaSummery;
   const stuData = route?.params?.stuData;
-  const {ref_person, total_add, total, admitted, posibility100} = teaSummery;
+  const {ref_person, total_add, total, admitted, posibility100, total_com} = teaSummery;
 
-  console.log(teaSummery.ref_person)
   return (
-    <View style={styles.container}>
-      
-      <Card>
-          <Card.Content>
+    <View style={styles.container}>     
+
               <Text style={{textAlign:'center', color:"#000", fontFamily:'HindSiliguri-SemiBold', fontSize:16}}>{ref_person}</Text>
               <View style={{ flexDirection:'row', justifyContent:'center', alignItems:'center', marginBottom:10}}>
                 
@@ -53,7 +50,7 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
                 </View>                 
                 <View style={{flex:1, flexDirection:'row', justifyContent:'center', alignItems:'center', padding:10}}>
                   <Icon name="gift" size={18} color="#444" />
-                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{total_add*100}</Text>
+                  <Text style={{color:"#444", fontFamily:'HindSiliguri-Regular', fontSize:18, paddingHorizontal:5}}>{total_com}</Text>
                 </View>            
               </View>
 
@@ -80,9 +77,7 @@ const NewStuInfoByTeacher = (props:NewStuInfoByTeacherProps) => {
                 </View>
               ))}
             </ScrollView>
-            
-          </Card.Content>
-        </Card>
+
     </View>
   );
 };

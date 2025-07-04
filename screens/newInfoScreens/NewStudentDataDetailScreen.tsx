@@ -62,7 +62,7 @@ const NewStudentDataDetailScreen: React.FC<NewStudentDataDetailScreenProps> = ({
               [10, 'লিঙ্গ', item.stu_gender],
               [11, 'ধর্ম', item.stu_religion],
               [12, 'পূর্বের বিদ্যালয়ের নাম', item.prev_school],
-              [13, 'তথ্য সংগ্রহের তারিখ', formatedDateTime(item.add_date)],
+              [13, 'তথ্য সংগ্রহের তারিখ', formatedDateTime(item.send_date)],
               [14, 'তথ্য সংগ্রহকারী', item.ref_person],
             ] as [number, string, any][]).map(([_, label, value], idx) => (
               <View key={idx} style={styles.infoRow}>

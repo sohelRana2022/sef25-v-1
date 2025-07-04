@@ -15,3 +15,7 @@ export const resultManagementHigh = [
     {id:2, menuTitle:'নম্বর যাচাই', icon:'check', route:'GetMarkSubWise', routeStatus: true},
     {id:3, menuTitle:'ফলাফল', icon:'contacts', route:'GetResultHighSection', routeStatus: true},
 ];
+
+export const UserManagement = [
+    {id:1, menuTitle:'ব্যবহারকারী', icon:'infocirlceo', route:'AdminHomeRoute', routeStatus: true}
+];

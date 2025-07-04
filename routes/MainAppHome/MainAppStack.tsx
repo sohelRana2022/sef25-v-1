@@ -8,7 +8,6 @@ import { getJsonDatafromAsyncStorage } from '../../lib/helpers/localStorageFuncs
 import { authStackInfo } from '../../lib/dTypes/routeDataType';
 import MyStudentsRoute from '../MyStudents/MyStudentsRoute';
 import StatisticsScreen from '../../screens/newInfoScreens/StatisticsScreen';
-import AddNewStudent from '../../screens/newInfoScreens/AddNewStudent';
 import AppContextProvider from '../../contexts/AppContext';
 import GetResultPrimary from '../../screens/markEntry/GetResultPrimary';
 import GetResultHighSection from '../../screens/markEntry/GetResultHighSection';
@@ -17,6 +16,7 @@ import ResultSheetPrimary from '../../screens/markEntry/ResultSheetPrimary';
 import SendMarkScreen from '../../screens/markEntry/SendMarkScreen';
 import UserHomeScreen from '../../screens/userScreens/UserHomeScreen';
 import NewStuInfoByTeacher from '../../screens/newInfoScreens/NewStuInfoByTeacher';
+import AdminHomeRoute from '../Admin/AdminHomeRoute';
 
 const Stack = createStackNavigator();
 
@@ -27,14 +27,13 @@ const appStackData: authStackInfo[] = [
   {name: 'AddmissionNavigator', component: AddmissionNavigator, hasHeader: false, title: 'নতুন তথ্য', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'MyStudentsRoute', component: MyStudentsRoute, hasHeader: false, title: 'আপনার শিক্ষার্থীর তথ্য', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'StatisticsScreen', component: StatisticsScreen, hasHeader: true, title: 'পরিসংখ্যান', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  {name: 'AddNewStudent', component: AddNewStudent, hasHeader: true, title: 'নতুন তথ্য সংগ্রহ ফরম', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
+  {name: 'AdminHomeRoute', component: AdminHomeRoute, hasHeader: false, title: 'নতুন তথ্য সংগ্রহ ফরম', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'SendMarkScreen', component: SendMarkScreen, hasHeader: true, title: 'নম্বর এন্ট্রি ফরম', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'GetResultPrimary', component: GetResultPrimary, hasHeader: true, title: 'ফলাফল ডাউনলোড', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'GetResultHighSection', component: GetResultHighSection, hasHeader: true, title: 'ফলাফল ডাউনলোড', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'GetMarkSubWise', component: GetMarkSubWise, hasHeader: true, title: 'বিষয়ভিত্তিক নম্বর পত্র', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'ResultSheetPrimary', component: ResultSheetPrimary, hasHeader: true, title: 'নম্বরপত্র', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  {name: 'NewStuInfoByTeacher', component: NewStuInfoByTeacher, hasHeader: true, title: 'শিক্ষকভিত্তিক সংগ্রহ তালিকা', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  
+  {name: 'NewStuInfoByTeacher', component: NewStuInfoByTeacher, hasHeader: true, title: 'শিক্ষকভিত্তিক সংগ্রহ তালিকা', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'}  
 ];
 
 

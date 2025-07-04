@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, TextInput, TouchableOpacity, Text, FlatList, Image } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, FlatList, Image, Modal, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/AntDesign';
 import UserIcon from 'react-native-vector-icons/FontAwesome5';
@@ -9,10 +9,17 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useAppContexts } from '../../contexts/AppContext';
 import { API_URL } from '../../apis/config';
-import { DataTable } from 'react-native-paper';
+import { Button, DataTable } from 'react-native-paper';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import firestore from '@react-native-firebase/firestore';
+import { getRemainingDays } from '../../lib/helpers/helpers';
+import { addInfoSchema, addInfoType } from '../../lib/zodschemas/zodSchemas';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import RadioButtons from '../../comps/Inputs/RadioButton';
+import { addPointData } from '../../lib/jsonValue/PickerData';
+import ControlledInput from '../../comps/Inputs/ControlledInput';
 
 interface NewStuInfoScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -39,15 +46,49 @@ interface StudentInfo {
     sef_branch: string,
     add_point: number;
     is_admitted : boolean,
-    add_date: string
+    send_date: Date,
+    is_active: boolean,
+    valid_days: number
 }
 
 const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }) => {
   const { user } = useAuthContexts();
   const [netStatus, setNetStatus] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [data, setData] = useState<StudentInfo[]>([]);
   const { loader, setLoader } = useAppContexts();
+
+
+
+const { control, handleSubmit, reset, watch } = useForm<addInfoType>({
+  resolver: zodResolver(addInfoSchema),
+  defaultValues: {
+    total_add_fee: 0,
+    add_point: 0,
+    commission: 0,
+    is_admitted: true,
+    add_date: new Date()
+  }
+});
+
+const watchedTotal = watch('total_add_fee');
+const watchedPoint = watch('add_point');
+
+useEffect(() => {
+  const newCommission = (watchedTotal || 0) * 0.1 * (watchedPoint || 0);
+  reset((prev) => ({
+    ...prev,
+    commission: newCommission
+  }));
+}, [watchedTotal, watchedPoint, reset]);
+
+
+
+
+
+
+
 
   const getData = async () => {
     setLoader(true);
@@ -55,17 +96,17 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
         const currentYear = new Date().getFullYear(); // 2025
 
         const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-
+        const now = new Date();
         const snapshot = await firestore()
           .collection('newinfos')
-          .where('add_date', '>=', startOfYear)
-          .orderBy('add_date', 'desc')
+          .where('send_date', '>=', startOfYear)
+          .orderBy('send_date', 'desc')
           .get();
 
         const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
             const data = doc.data();
-            const timestamp = data.add_date; // Firestore Timestamp
-            const jsDate = timestamp.toDate().toString(); // JavaScript Date object
+            const timestamp = data.send_date; // Firestore Timestamp
+            const jsDate = timestamp.toDate() // JavaScript Date object
 
               return {
                 ref_uid: data.ref_uid,
@@ -86,12 +127,24 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
                 ref_person: data.ref_person,
                 sef_branch: data.sef_branch,
                 is_admitted: data.is_admitted,
-                add_date: jsDate,
-                add_point: data.add_point
+                send_date: jsDate,
+                add_point: data.add_point,
+                is_active: data.is_active,
+                valid_days: data.valid_days
               };
           });
+        
+        const activeStudents = newStuData.filter(student => {
+          const validTill = new Date(student.send_date);
+          validTill.setDate(validTill.getDate()+student.valid_days);
+          const isActive = student.is_active !== false;
+          const isAdmitted = student.is_admitted === true;
+          return isActive && (now < validTill || isAdmitted) 
+        });
 
-       setData(newStuData);
+        user?.role === 'admin' ? setData(newStuData) : setData(activeStudents);
+
+        
     } catch (err) {
       setNetStatus(true);
     } finally {
@@ -105,7 +158,6 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
   }, []);
 
 
-
   const filteredData = useMemo(() => {
     if (!Array.isArray(data)) return [];
     const searchWords = searchText.toLowerCase().trim().split(/\s+/);
@@ -115,6 +167,11 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
       )
     );
   }, [searchText, data]);
+
+const submit = (data:addInfoType) =>{
+  console.log(data);
+}
+
 
 
   return (
@@ -165,22 +222,102 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
           data={searchText === '' ? data : filteredData}
           navigation={navigation}
           route={route}
+          setModalVisible={setModalVisible}
         />
       )}
+
+
+
+{/* Modal */}
+    <Modal
+      transparent
+      animationType="fade"
+      visible={modalVisible}
+      onRequestClose={() => setModalVisible(false)} // For Android back button
+    >
+      <View style={styles.modalBackground}>
+        <View className='w-[90%] bg-white py-5 px-10 rounded-lg justify-center'>
+          <Text className='text-base text-black font-HindSemiBold text-center py-2'>ভর্তি নিশ্চায়ন ফরম</Text>
+
+
+              <ControlledInput 
+                control={control}
+                name={"total_add_fee"}
+                placeholder={""}
+                label={"সর্বমোট ভর্তি-ফি (টাকা)"}
+                keyboardType='numeric'
+                style={{ backgroundColor: "#FFF", fontFamily: 'HindSiliguri-SemiBold', marginBottom:20}}
+              />
+              <RadioButtons
+                control={control}
+                name='add_point'
+                labelTitle={"ভর্তিতে অবদান রাখা শিক্ষক সংখ্যা"}
+                direction='column'
+                items={addPointData}
+                
+              />
+
+            
+
+                <Button className='my-5' onPress={handleSubmit(submit)} mode={"contained"}>
+                  <ActivityIndicator
+                    style={{position:'absolute', left:40, right:20}}
+                  />
+                  ভর্তি নিশ্চিত করুন
+                </Button>
+            
+        </View>
+      </View>
+    </Modal>
+
+
+
+
+
+
+
     </>
   );
 };
 
 export default NewStuInfoScreen;
 
+
+const styles = StyleSheet.create({
+
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderColor: '#000',
+    borderRadius: 8
+  },
+  buttonText: {
+    color: '#000'
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+
+
+})
+
+
+
+
 const NewInfoTable = ({
   data,
   navigation,
   route,
+  setModalVisible
 }: {
   data: StudentInfo[];
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
+  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>
+
 }) => {
   const { user } = useAuthContexts();
   const [page, setPage] = React.useState<number>(0);
@@ -218,35 +355,52 @@ const NewInfoTable = ({
         <DataTable.Header>
           <DataTable.Title style={{ flex: 0.5 }}>ক্রম</DataTable.Title>
           <DataTable.Title style={{ flex: 3 }}>শিক্ষার্থীর নাম </DataTable.Title>
-          <DataTable.Title style={{ flex: 1 }}>শ্রেণী </DataTable.Title>
-          <DataTable.Title style={{ flex: 1}}>সম্ভাবনা </DataTable.Title>
-          <DataTable.Title style={{ flex: 0.5}}>ভর্তি</DataTable.Title>
+          <DataTable.Title style={{ flex: 0.5 }}>শ্রেণী </DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>{''}</DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>{''}</DataTable.Title>
         </DataTable.Header>
 
       {data.slice(from, to).map((item, index) => (
         <DataTable.Row
         style={{backgroundColor: index % 2 === 0 ? '#FFF' : '#eee'}} 
-        key={item.uid} 
-          onPress={() =>
-          user && (item.ref_person === user.nameBang || user.role === 'admin')
-            ? navigation.navigate('NewStudentDataDetailScreen', { ...route.params, item })
-            : null
-        }
+        key={item.uid}
         
         >
           <DataTable.Cell style={{ flex: 0.5 }}>{index+1}</DataTable.Cell>
           <DataTable.Cell style={{ flex: 3}}>
-           <View>
+           <View className='justify-center items-center flex-row'>
+            <Text className='absolute top-[10] left-4 text-black bg-gray-200 rounded-lg text-center font-HindSemiBold px-1.5' style={{fontSize: 10}}>{getRemainingDays(item.send_date, item.valid_days)}</Text>
+            <View className='w-[20%]'>
+              {item.is_admitted ? 
+                <Icon name="check" size={15} color="green" style={{textAlign:'left'}} /> :
+                <Icon name="close" size={15} color="red" style={{textAlign:'left'}} /> }
+            </View>
+            <View className='flex-col w-[80%]'>
              <Text className='text-sm text-black font-HindSemiBold'>{item.stu_name_bn}</Text>
             <Text className='text-xs text-gray-400 font-HindSemiBold'>{item.ref_person}</Text>
+            </View>
            </View>
             
             </DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>{item.stu_class}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>{item.posibility+'%'}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 0.5 }}>{item.is_admitted ? 
-            <Icon name="check" size={24} color="green" style={{width:'100%', textAlign:'center'}} /> :
-            <Icon name="close" size={24} color="red" style={{width:'100%', textAlign:'center'}} /> }
+          <DataTable.Cell style={{ flex: 0.5 }}>{item.stu_class}</DataTable.Cell>
+          <DataTable.Cell 
+          textStyle={{textAlign:'center', color:'#ddd', alignSelf:'center'}} 
+          style={{ flex: 1, justifyContent: 'center'}}
+              onPress={() =>
+              user && (item.ref_uid === user.uid || user.role === 'admin')
+                ? navigation.navigate('NewStudentDataDetailScreen', {item: {...item, send_date: item.send_date.toISOString()}}) : null
+              }
+            >
+            {<Icon name="eye" size={25} color="black" style={{textAlign:'left'}} /> }
+            </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}
+            onPress={() =>
+            user && (user.role === 'admin')
+              ? setModalVisible(true)
+              : null
+            }
+          >{
+            <Icon name="checkcircle" size={24} color="green" style={{width:'100%', textAlign:'center'}} /> }
           </DataTable.Cell>
         </DataTable.Row>
       ))}

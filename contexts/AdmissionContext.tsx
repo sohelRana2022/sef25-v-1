@@ -10,6 +10,7 @@ import {
     AdmissionDataSchema,
     extraDataType
     } from "../lib/zodschemas/zodSchemas";
+import { calculateValidDays } from "../lib/helpers/helpers";
 
 
 type AdmissionContextType = {
@@ -66,7 +67,7 @@ const AdmissionContextProvider: React.FC<AdmissionContextProviderProps> = ({ chi
         }
                 
         const docRef = firestore().collection('newinfos').doc(); // generate document reference with ID
-        await docRef.set({ ...allAdmissionData, add_date: timestamp, is_admitted: false });
+        await docRef.set({ ...allAdmissionData, valid_days: calculateValidDays(timestamp), send_date: timestamp, is_admitted: false, is_active: true });
         if(docRef.id){
             return {status: true, message: 'অভিনন্দন! আপনার তথ্য জমা হয়েছে ।'}; // Return true on successful registration
         }else{

@@ -139,6 +139,54 @@ export function countByPropWithRank<T>(
   }));
 }
 
+// valid days calculate 
 
+const calculateValidDays =(date: Date)=>{
+  const year = date.getFullYear();
+  const checkPoints = [
+    {cutoff: new Date(`${year}-07-10`), days: 15},
+    {cutoff: new Date(`${year}-07-15`), days: 14},
+    {cutoff: new Date(`${year}-08-01`), days: 13},
+    {cutoff: new Date(`${year}-08-15`), days: 12},
+    {cutoff: new Date(`${year}-09-01`), days: 11},
+    {cutoff: new Date(`${year}-09-15`), days: 10},
+    {cutoff: new Date(`${year}-10-01`), days: 9},
+    {cutoff: new Date(`${year}-10-15`), days: 8},
+    {cutoff: new Date(`${year}-11-01`), days: 7},
+    {cutoff: new Date(`${year}-11-15`), days: 6},
+    {cutoff: new Date(`${year}-12-31`), days: 5},
+  ];
 
-export {splitByFirstSpace, formatedDateTime, getDataFromSheet, removeAttributes, isValidEmail, updateError, isValidObj, isValidMobile, gp}
+  for(let i=0; i<checkPoints.length; i++){
+    if(date <= checkPoints[i].cutoff){
+      return checkPoints[i].days;
+    }
+  }
+  return 5
+}
+
+// get remaining days
+const getRemainingDays = (send_date: Date, valid_days: number): number => {
+  const now = new Date();
+  const added = new Date(send_date);
+
+  const diffOfTime = now.getTime() - added.getTime(); // milliseconds
+  const passedDays = Math.floor(diffOfTime / (1000 * 60 * 60 * 24));
+
+  const remaining = valid_days - passedDays;
+  return remaining > 0 ? remaining : 0;
+};
+
+export {
+  getRemainingDays, 
+  calculateValidDays, 
+  splitByFirstSpace, 
+  formatedDateTime, 
+  getDataFromSheet, 
+  removeAttributes, 
+  isValidEmail, 
+  updateError, 
+  isValidObj, 
+  isValidMobile, 
+  gp
+}

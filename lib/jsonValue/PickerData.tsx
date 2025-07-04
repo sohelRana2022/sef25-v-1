@@ -53,6 +53,13 @@ export const genderData = [
     {id: 2, label: 'ছাত্রী', value: 'ছাত্রী'}
 ]
 
+export const addPointData = [
+    {id: 1, label: 'এক জন', value: '1'},
+    {id: 2, label: 'দুই জন', value: '0.5'},
+    {id: 3, label: 'তিন জন', value: '0.33'},
+    {id: 4, label: 'চার জন', value: '0.25'}
+] 
+
 export const religionData = [
     {id: 1, label: 'ইসলাম', value: 'ইসলাম'},
     {id: 2, label: 'হিন্দু', value: 'হিন্দু'},

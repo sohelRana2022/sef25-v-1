@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import MainAppStack from '../routes/MainAppHome/MainAppStack';
 import AuthenticationRoute from './Authentication/AuthenticationRoute';
-import auth, { User } from '@react-native-firebase/auth';
+import auth,  { User } from '@react-native-firebase/auth';
 import firestore, { DocumentSnapshot } from '@react-native-firebase/firestore';
 import { useAuthContexts } from '../contexts/AuthContext';
 

@@ -11,35 +11,15 @@ import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import { countByPropWithRank } from '../../lib/helpers/helpers';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { studentDataType } from '../../lib/dTypes/StudentDataType';
 const uData = {"contact": "01740096872", "email": "sof@gmail.com", "id": "5K5CM5vrnBdoHIYGgANJ", "imageId": "FsjkwjvzkzigammKzv", "role": "Director", "sefBranch": "তারাকান্দি", "userName": "রবিন রানা"}
 interface StatisticsScreenProps{
     navigation: NativeStackNavigationProp<any, any>;
     route: RouteProp<any, any>;
+    StudentInfo: studentDataType;
 }
 
 
-interface StudentInfo {
-    ref_uid: string,
-    uid: string,
-    stu_name_bn: string,
-    stu_name_eng: string,
-    stu_class: string,
-    stu_gender: string,
-    stu_religion: string,
-    prev_school: string,
-    posibility: number,
-    father_name: string,
-    mother_name: string,
-    contact_1: string,
-    contact_2: string,
-    address: string,
-    village: string,
-    ref_person: string,
-    sef_branch: string,
-    add_point: number;
-    is_admitted : boolean,
-    add_date: string, 
-}
 
 type Summary = {
   ref_uid: string;
@@ -48,9 +28,10 @@ type Summary = {
   admitted: number;
   posibility100: number;
   total_add: number;
+  total_com: number
 };
 
-const summarizeByRefPerson = (data: StudentInfo[]): Summary[] => {
+const summarizeByRefPerson = (data: studentDataType[]): Summary[] => {
   const grouped = data.reduce<Record<string, Summary>>((acc, curr) => {
     const person = curr.ref_person || 'Unknown';
     const ref_uid = curr.ref_uid || 'Unknown';
@@ -61,14 +42,17 @@ const summarizeByRefPerson = (data: StudentInfo[]): Summary[] => {
         total: 0,
         admitted: 0,
         posibility100: 0,
-        total_add: 0
+        total_add: 0,
+        total_com: 0
       };
     }
+  console.log('curr:', curr);
 
     acc[ref_uid].total += 1;
     if (curr.is_admitted) acc[ref_uid].admitted += 1;
     if (Number(curr.posibility) === 100) acc[ref_uid].posibility100 += 1;
     acc[ref_uid].total_add += Number(curr.add_point || 0); // add_point যোগ
+    acc[ref_uid].total_com += Number(curr.commission || 0); // commission যোগ
     return acc;
   }, {});
 
@@ -76,7 +60,7 @@ const summarizeByRefPerson = (data: StudentInfo[]): Summary[] => {
 };
 
 const StatisticsScreen = (props: StatisticsScreenProps) => {
-  const [allData, setAllData] = useState<StudentInfo[]>([]);
+  const [allData, setAllData] = useState<studentDataType[]>([]);
   const [summeryData, setSummeryData] = useState<Summary[]>([]);
   const {navigation, route}= props;
   const { loader, setLoader } = useAppContexts();
@@ -107,7 +91,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
 
         const snapshot = await firestore()
           .collection('newinfos')
-          .where('add_date', '>=', startOfYear)
+          .where('send_date', '>=', startOfYear)
           .get(); 
 
         const newStuData = snapshot.docs.map(doc => {
@@ -131,8 +115,13 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
                 ref_person: data.ref_person,
                 sef_branch: data.sef_branch,
                 is_admitted: data.is_admitted,
-                add_date: data.add_date,
-                add_point: data.add_point
+                send_date: data.add_date,
+                add_point: data.add_point,
+                is_active: data.is_active,
+                valid_days: data.valid_days,
+                total_add_fee: data.add_fee ?? 0,
+                commission: data.commission ?? 0
+                
               };
           });
         setAllData(newStuData);
@@ -172,7 +161,7 @@ export default StatisticsScreen;
 
 
 type StatisticTableProps = {
-  allData: StudentInfo[];
+  allData: studentDataType[];
   data: Summary[];
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
