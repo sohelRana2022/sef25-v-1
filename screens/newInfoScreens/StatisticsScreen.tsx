@@ -46,7 +46,6 @@ const summarizeByRefPerson = (data: studentDataType[]): Summary[] => {
         total_com: 0
       };
     }
-  console.log('curr:', curr);
 
     acc[ref_uid].total += 1;
     if (curr.is_admitted) acc[ref_uid].admitted += 1;
@@ -221,9 +220,7 @@ const StatisticTable = ({
             onPress={()=>{
                 user?.uid === item.ref_uid || user?.role === 'admin' ? 
                 navigation.navigate('NewStuInfoByTeacher', 
-                  {teaSummery:item, 
-                    stuData:allData.filter(r=>r.ref_uid===item.ref_uid).sort((a,b)=>b.posibility-a.posibility)
-                  })
+                  {ref_uid:item.ref_uid})
                 : null
               }
             }

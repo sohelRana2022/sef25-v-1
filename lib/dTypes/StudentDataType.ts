@@ -25,6 +25,15 @@ export type studentDataType = {
     commission: number,
     total_add_fee: number
   }
+export type summary = {
+  ref_uid: string;
+  ref_person: string;
+  total: number;
+  admitted: number;
+  posibility100: number;
+  total_add: number;
+  total_com: number
+};
 
   export type resultDataType = {
     acYear: string,

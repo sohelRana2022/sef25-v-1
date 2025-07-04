@@ -35,7 +35,7 @@ const MenuList = (props: MenuListProps) => {
         renderItem={({item, index})=>{
           return (
           <TouchableOpacity 
-              onPress={()=> item.routeStatus && (user?.role === "editor" || user?.role === "admin") ? navigation.navigate(item.route) : null} 
+              onPress={()=> item.routeStatus && (user?.role === "editor" || user?.role === "admin") ? navigation.navigate(item.route,{ref_uid:user.uid}) : null} 
               key={item.id} 
               style={styles.menuButton}
           >

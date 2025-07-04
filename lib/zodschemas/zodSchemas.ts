@@ -52,6 +52,17 @@ export type LoginInfoType = z.infer<typeof LoginInfoSchema>
 
 
 // creating a schema for personal info form
+
+export const primaryContactSchema = z.object({
+                    contact_1: z.string()
+                    .min(1, {message:'পিতার মোবাইল নাম্বার অবশ্যক!'})
+                    .regex(/(^(01){1}[3-9]{1}(\d){8})$/,{message:'মোবাইল নাম্বারটি সঠিক নয়!'})
+                    })
+export type primaryContactType = z.infer<typeof primaryContactSchema>;
+
+
+
+
 export const PersonalInfoSchemama = z.object({
     stu_name_bn: z.string().trim()
     .nonempty({message:'শিক্ষার্থীর বাংলা পূর্ণনাম অবশ্যই দিতে হবে। '})
@@ -85,10 +96,6 @@ export const ParentsAndContactInfoSchemama = z.object({
   mother_name: z.string().trim()
   .nonempty({message:'মাতার বাংলা পূর্ণনাম অবশ্যক!'})
   .regex(/^[\u0980-\u09FF\s.]+$/, { message: 'শুধুমাত্র বাংলা অক্ষরে মাতার নাম লিখতে হবে।' }),
-
-  contact_1: z.string()
-  .min(1, {message:'পিতার মোবাইল নাম্বার অবশ্যক!'})
-  .regex(/(^(01){1}[3-9]{1}(\d){8})$/,{message:'মোবাইল নাম্বারটি সঠিক নয়!'}),
 
   contact_2: z.string()
   .min(1, {message:'মাতার মোবাইল নাম্বার অবশ্যক!'})

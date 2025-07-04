@@ -1,6 +1,7 @@
 
 import axios from 'axios';
 import { Linking } from 'react-native'
+import { studentDataType, summary } from '../dTypes/StudentDataType';
 //import { SendDirectSms } from 'react-native-send-direct-sms';
 
 
@@ -175,6 +176,35 @@ const getRemainingDays = (send_date: Date, valid_days: number): number => {
 
   const remaining = valid_days - passedDays;
   return remaining > 0 ? remaining : 0;
+};
+
+
+
+export const summarizeByRefPerson = (data: studentDataType[]): summary[] => {
+  const grouped = data.reduce<Record<string, summary>>((acc, curr) => {
+    const person = curr.ref_person || 'Unknown';
+    const ref_uid = curr.ref_uid || 'Unknown';
+    if (!acc[ref_uid]) {
+      acc[ref_uid] = {
+        ref_person: person,
+        ref_uid: ref_uid,
+        total: 0,
+        admitted: 0,
+        posibility100: 0,
+        total_add: 0,
+        total_com: 0
+      };
+    }
+
+    acc[ref_uid].total += 1;
+    if (curr.is_admitted) acc[ref_uid].admitted += 1;
+    if (Number(curr.posibility) === 100) acc[ref_uid].posibility100 += 1;
+    acc[ref_uid].total_add += Number(curr.add_point || 0); // add_point যোগ
+    acc[ref_uid].total_com += Number(curr.commission || 0); // commission যোগ
+    return acc;
+  }, {});
+
+  return Object.values(grouped).sort((a, b) => b.admitted - a.admitted);
 };
 
 export {

@@ -20,7 +20,7 @@ const CheckAllDataAndSubmit:React.FC<CheckAllDataAndSubmitProps> = ({ navigation
   const [msg, setMsg] = React.useState<string>('');
   const {user} = useAuthContexts();
 
-const {loader, setLoader, personalInfo, parentsAndContactInfo, onSubmitAll, resetForm } = useAdmissionContexts();
+const {loader, setLoader, primaryContact, personalInfo, parentsAndContactInfo, onSubmitAll, resetForm } = useAdmissionContexts();
 const { handleSubmit, reset } = useForm<extraDataType>({
   resolver: zodResolver(extraDataSchema),
   defaultValues: {
@@ -97,7 +97,7 @@ return (
               [8, 'ধর্ম', personalInfo?.stu_religion],
               [9, 'পূর্বের বিদ্যালয়ের নাম', personalInfo?.prev_school],
               [10, 'ভর্তির সম্ভাবনা', personalInfo?.posibility+'%'],
-              [11, 'পিতার মোবাইল নাম্বার', parentsAndContactInfo?.contact_1],
+              [11, 'পিতার মোবাইল নাম্বার', primaryContact?.contact_1],
               [12, 'মাতার মোবাইল নাম্বার', parentsAndContactInfo?.contact_2],
               [13, 'ঠিকানা', `${parentsAndContactInfo?.address}, ${parentsAndContactInfo?.village}`],
               [14, 'রেফারেন্স', user?.nameBang],

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, Text } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,11 +52,13 @@ useFocusEffect(
   
 
   return (
-    <View style={{ flex: 1, justifyContent:'center', alignItems:'center', alignContent:'center'}}>
-        <Card style={{ backgroundColor:"#FFF", height:'78%', width:'90%'}}>
-          <ScrollView>
-          <Card.Title title={'শিক্ষার্থী সম্পর্কিত তথ্য'} titleStyle={{textAlign:'center', marginTop:15}}/>
-          <Card.Content>
+    <View style={{ flex: 1, justifyContent:'center', alignItems:'center', alignContent:'center', backgroundColor:"#FFF"}}>
+        <View style={{ width:'80%'}}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{paddingVertical:10}}
+          >
+          <Text className='text-lg text-black font-HindSemiBold text-center'>শিক্ষার্থী সম্পর্কিত তথ্য</Text>
             
             <ControlledInput 
               control={control}
@@ -115,9 +117,9 @@ useFocusEffect(
           </Button>
           </View>
           
-          </Card.Content>
+    
           </ScrollView>
-        </Card>
+        </View>
         
 
 
