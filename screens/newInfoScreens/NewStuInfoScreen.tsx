@@ -1,14 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, TextInput, TouchableOpacity, Text, FlatList, Image, Modal, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, Image, Modal, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/AntDesign';
-import UserIcon from 'react-native-vector-icons/FontAwesome5';
-import { height } from '../../lib/configs/Dimensions';
-import axios from 'axios';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useAppContexts } from '../../contexts/AppContext';
-import { API_URL } from '../../apis/config';
 import { Button, DataTable } from 'react-native-paper';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
@@ -56,6 +52,7 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({ navigation, route }
   const [netStatus, setNetStatus] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [docuid, setDocuid] = useState('');
   const [data, setData] = useState<StudentInfo[]>([]);
   const { loader, setLoader } = useAppContexts();
 
@@ -83,20 +80,13 @@ useEffect(() => {
   }));
 }, [watchedTotal, watchedPoint, reset]);
 
-
-
-
-
-
-
-
   const getData = async () => {
     setLoader(true);
     try {
         const currentYear = new Date().getFullYear(); // 2025
 
         const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-        const now = new Date();
+        //const now = new Date();
         const snapshot = await firestore()
           .collection('newinfos')
           .where('send_date', '>=', startOfYear)
@@ -134,16 +124,16 @@ useEffect(() => {
               };
           });
         
-        const activeStudents = newStuData.filter(student => {
-          const validTill = new Date(student.send_date);
-          validTill.setDate(validTill.getDate()+student.valid_days);
-          const isActive = student.is_active !== false;
-          const isAdmitted = student.is_admitted === true;
-          return isActive && (now < validTill || isAdmitted) 
-        });
+        // const activeStudents = newStuData.filter(student => {
+        //   const validTill = new Date(student.send_date);
+        //   validTill.setDate(validTill.getDate()+student.valid_days);
+        //   const isActive = student.is_active !== false;
+        //   const isAdmitted = student.is_admitted === true;
+        //   return isActive && (now < validTill || isAdmitted) 
+        // });
 
-        user?.role === 'admin' ? setData(newStuData) : setData(activeStudents);
-
+        setData(newStuData)
+        setLoader(false)
         
     } catch (err) {
       setNetStatus(true);
@@ -168,8 +158,24 @@ useEffect(() => {
     );
   }, [searchText, data]);
 
-const submit = (data:addInfoType) =>{
-  console.log(data);
+const update = async (data:addInfoType) =>{
+  setLoader(true)
+  try {
+    await firestore()
+      .collection('newinfos')
+      .doc(docuid)
+      .update(data)
+      .then(()=>{
+        setLoader(false)
+        setModalVisible(false)
+      })
+    
+  } catch (error) {
+     console.log(error);
+  } finally{
+    setLoader(false)
+  }
+ 
 }
 
 
@@ -223,6 +229,7 @@ const submit = (data:addInfoType) =>{
           navigation={navigation}
           route={route}
           setModalVisible={setModalVisible}
+          setDocuid={setDocuid}
         />
       )}
 
@@ -237,6 +244,19 @@ const submit = (data:addInfoType) =>{
     >
       <View style={styles.modalBackground}>
         <View className='w-[90%] bg-white py-5 px-10 rounded-lg justify-center'>
+       {loader && (
+        <View style={{ position: 'absolute', top:50, right: 170, zIndex: 1000 }}>
+          <ActivityIndicator color={'#000'} />
+        </View>
+      )}        
+
+        <TouchableOpacity
+          className='absolute top-5 right-5'
+          onPress={()=>setModalVisible(false)}
+        >
+          <Icon name={'close'} size={25} color="red" />
+        </TouchableOpacity>
+
           <Text className='text-base text-black font-HindSemiBold text-center py-2'>ভর্তি নিশ্চায়ন ফরম</Text>
 
 
@@ -259,10 +279,8 @@ const submit = (data:addInfoType) =>{
 
             
 
-                <Button className='my-5' onPress={handleSubmit(submit)} mode={"contained"}>
-                  <ActivityIndicator
-                    style={{position:'absolute', left:40, right:20}}
-                  />
+                <Button className='my-5' onPress={handleSubmit(update)} mode={"contained"}>
+
                   ভর্তি নিশ্চিত করুন
                 </Button>
             
@@ -311,12 +329,14 @@ const NewInfoTable = ({
   data,
   navigation,
   route,
-  setModalVisible
+  setModalVisible,
+  setDocuid,
 }: {
   data: StudentInfo[];
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
-  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>
+  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setDocuid: React.Dispatch<React.SetStateAction<string>>;
 
 }) => {
   const { user } = useAuthContexts();
@@ -369,7 +389,7 @@ const NewInfoTable = ({
           <DataTable.Cell style={{ flex: 0.5 }}>{index+1}</DataTable.Cell>
           <DataTable.Cell style={{ flex: 3}}>
            <View className='justify-center items-center flex-row'>
-            <Text className='absolute top-[10] left-4 text-black bg-gray-200 rounded-lg text-center font-HindSemiBold px-1.5' style={{fontSize: 10}}>{getRemainingDays(item.send_date, item.valid_days)}</Text>
+            
             <View className='w-[20%]'>
               {item.is_admitted ? 
                 <Icon name="check" size={15} color="green" style={{textAlign:'left'}} /> :
@@ -377,7 +397,7 @@ const NewInfoTable = ({
             </View>
             <View className='flex-col w-[80%]'>
              <Text className='text-sm text-black font-HindSemiBold'>{item.stu_name_bn}</Text>
-            <Text className='text-xs text-gray-400 font-HindSemiBold'>{item.ref_person}</Text>
+            <Text className='text-xs text-gray-400 font-HindSemiBold'>{item.ref_person+' | '+item.village}</Text>
             </View>
            </View>
             
@@ -388,17 +408,21 @@ const NewInfoTable = ({
           style={{ flex: 1, justifyContent: 'center'}}
               onPress={() =>
               user && (item.ref_uid === user.uid || user.role === 'admin')
-                ? navigation.navigate('NewStudentDataDetailScreen', {item: {...item, send_date: item.send_date.toISOString()}}) : null
+                ? navigation.navigate('NewInfoNavigator', {
+                                            screen: 'NewStudentDataDetailScreen',
+                                            params: {stu_data: {...item, send_date: new Date(item.send_date).toISOString()}},
+                                          }) : null
               }
             >
-            {<Icon name="eye" size={25} color="black" style={{textAlign:'left'}} /> }
+            {<Icon name="eye" size={25} color="black" style={{textAlign:'center'}} /> }
             </DataTable.Cell>
           <DataTable.Cell style={{ flex: 1 }}
-            onPress={() =>
+            onPress={() =>{
+            setDocuid(item.uid);  
             user && (user.role === 'admin')
               ? setModalVisible(true)
               : null
-            }
+            }}
           >{
             <Icon name="checkcircle" size={24} color="green" style={{width:'100%', textAlign:'center'}} /> }
           </DataTable.Cell>

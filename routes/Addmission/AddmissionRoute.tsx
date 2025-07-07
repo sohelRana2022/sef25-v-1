@@ -9,10 +9,10 @@ import CheckNewData from '../../screens/admission/CheckNewData';
 const AddmissionNav = createStackNavigator();
 
 const AddmissionStackData = [
-  {id:1, name:'CheckNewData', component:CheckNewData, hasHeader:true, title: 'নতুন শিক্ষার্থীর তথ্য যাচাই', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  {id:2, name:'AdmissionHome', component:AdmissionHome, hasHeader:true, title: 'নতুন শিক্ষার্থীর তথ্য ফরম', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  {id:3, name:'ParentsAndContact', component:ParentsAndContact, hasHeader:true, title: 'নতুন শিক্ষার্থীর তথ্য ফরম', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  {id:4, name:'CheckAllDataAndSubmit', component:CheckAllDataAndSubmit, hasHeader:true, title: 'তথ্য যাচাই ও পাঠানো', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
+  {id:1, name:'CheckNewData', component:CheckNewData, hasHeader:true, title: 'নতুন শিক্ষার্থীর তথ্য (ধাপ-০১)', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
+  {id:2, name:'AdmissionHome', component:AdmissionHome, hasHeader:true, title: 'নতুন শিক্ষার্থীর তথ্য (ধাপ-০২)', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
+  {id:3, name:'ParentsAndContact', component:ParentsAndContact, hasHeader:true, title: 'নতুন শিক্ষার্থীর তথ্য ফরম (ধাপ-০৩)', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
+  {id:4, name:'CheckAllDataAndSubmit', component:CheckAllDataAndSubmit, hasHeader:true, title: 'তথ্য যাচাই ও পাঠানো (ধাপ-০৪)', height:60, backgroundColor: '#0B2447', fontFamily:'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   
 ];
 interface AddmissionNavigatorProps {

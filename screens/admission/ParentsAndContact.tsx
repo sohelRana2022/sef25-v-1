@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, ActivityIndicator} from 'react-native';
 import { Card, Button, useTheme, HelperText } from 'react-native-paper';
 import { Control, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,7 +21,7 @@ type address = {
   value: string
 }
 const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route }) => {
-  const {parentsAndContactInfo, setParentsAndContactInfo} = useAdmissionContexts();
+  const {loader, setLoader, parentsAndContactInfo, setParentsAndContactInfo} = useAdmissionContexts();
   const [address, setAddress] = useState<address[]>([]);
   const { control, handleSubmit, formState: { errors } } = useForm<ParentsAndContactInfoType>({
     resolver: zodResolver(ParentsAndContactInfoSchemama),
@@ -37,8 +37,10 @@ const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route 
     navigation.navigate('AdmissionHome');
   };
   const next = (data: ParentsAndContactInfoType) => {
+    setLoader(true)
     setParentsAndContactInfo(data);
     navigation.navigate('CheckAllDataAndSubmit'); // Replace with the actual next screen's name
+    
   };
 
   const fetchData = async (sheetName: string, setData: (data: any) => void) => {
@@ -52,10 +54,18 @@ const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route 
   };
 
   useEffect(() => {
+    setLoader(false)
     fetchData('address', setAddress);
   }, []);
   return (
     <View style={{flex: 1, justifyContent:'center', alignItems:'center', alignContent:'center', backgroundColor:"#FFF"}}>
+      {loader && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#FFF" />
+        </View>
+      )}
+      
+      
       <View style={{ width:'80%'}}>
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -68,7 +78,7 @@ const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route 
               name={"father_name"}
               placeholder={""}
               label={"পিতার নাম"}
-              style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF", marginVertical:10}}
+              style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
             />          
 
             <ControlledInput 
@@ -76,7 +86,7 @@ const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route 
               name={"mother_name"}
               placeholder={""}
               label={"মাতার নাম"}
-              style={{fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF", marginVertical:10}}
+              style={{fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
             />
 
             <ControlledInput 
@@ -93,7 +103,7 @@ const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route 
               placeholder={""}
               label={"বিস্তারিত ঠিকানা"}
               multiline={true}
-              style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF", marginVertical:10}}
+              style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
             />
             <CustomPicker 
               control={control}
@@ -139,4 +149,16 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
   },
+
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor:'rgba(0, 0, 0, 0.5)',
+    zIndex:100
+  }
 });

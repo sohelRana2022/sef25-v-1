@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, ActivityIndicator } from 'react-native';
 import { useAdmissionContexts } from '../../contexts/AdmissionContext';
 import { Button, Card, Snackbar } from 'react-native-paper';
@@ -34,7 +34,11 @@ const { handleSubmit, reset } = useForm<extraDataType>({
 
 const goAddHome = () => {
   setSuccess(false);
-  navigation.navigate('AdmissionHome')
+  navigation.navigate('CheckNewData')
+}
+const goHome = () => {
+  setSuccess(false);
+  navigation.navigate('UserHomeScreen')
 }
 
 const submit = async (data:extraDataType) =>{
@@ -52,6 +56,11 @@ const submit = async (data:extraDataType) =>{
     setSuccess(true);
   }
 }
+
+  useEffect(() => {
+    setLoader(false)
+  }, []);
+  
 return (
 <ScrollView>
     <View style={styles.container}>
@@ -61,9 +70,15 @@ return (
             <Text style={styles.msgText}>
               {msg}
             </Text>
-            <Button style={{height:40, marginTop:20 }} onPress={()=>goAddHome()} mode={"contained"}>
-              আরেকটি তথ্য পাঠাবো 
-            </Button>
+            <View className='flex-row justify-center gap-5 px-3 w-[80%]'>
+              <Button style={{height:40, marginTop:20 }} onPress={()=>goAddHome()} mode={"contained"}>
+                নতুন ফরম
+              </Button>
+              <Button style={{height:40, marginTop:20 }} onPress={()=>goHome()} mode={"contained"}>
+                হোম এ যাবো
+              </Button>
+            </View>
+
           </View>
         )}
 

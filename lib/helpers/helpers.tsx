@@ -182,6 +182,9 @@ const getRemainingDays = (send_date: Date, valid_days: number): number => {
 
 export const summarizeByRefPerson = (data: studentDataType[]): summary[] => {
   const grouped = data.reduce<Record<string, summary>>((acc, curr) => {
+    const today = new Date();
+    const sevenDayAgoDate = new Date();
+    sevenDayAgoDate.setDate(today.getDate()-7);
     const person = curr.ref_person || 'Unknown';
     const ref_uid = curr.ref_uid || 'Unknown';
     if (!acc[ref_uid]) {
@@ -192,13 +195,15 @@ export const summarizeByRefPerson = (data: studentDataType[]): summary[] => {
         admitted: 0,
         posibility100: 0,
         total_add: 0,
-        total_com: 0
+        total_com: 0,
+        prev7DayaData:0
       };
     }
 
     acc[ref_uid].total += 1;
     if (curr.is_admitted) acc[ref_uid].admitted += 1;
     if (Number(curr.posibility) === 100) acc[ref_uid].posibility100 += 1;
+    if (new Date(curr.send_date) >= sevenDayAgoDate) acc[ref_uid].prev7DayaData += 1;
     acc[ref_uid].total_add += Number(curr.add_point || 0); // add_point যোগ
     acc[ref_uid].total_com += Number(curr.commission || 0); // commission যোগ
     return acc;

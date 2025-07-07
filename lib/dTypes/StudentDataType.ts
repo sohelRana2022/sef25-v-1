@@ -32,7 +32,8 @@ export type summary = {
   admitted: number;
   posibility100: number;
   total_add: number;
-  total_com: number
+  total_com: number,
+  prev7DayaData: number
 };
 
   export type resultDataType = {

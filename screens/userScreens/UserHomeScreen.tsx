@@ -15,7 +15,6 @@ import { theme } from '../../lib/themes/theme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useAuthContexts } from '../../contexts/AuthContext';
-import ErrMsg from '../../comps/Messages/ErrMsg';
 import Carousel from 'react-native-reanimated-carousel';
 import axios from 'axios';
 import { IMG_API, SLIDERS_API } from '../../apis/config';
@@ -73,7 +72,7 @@ const { width } = Dimensions.get('window');
 
 
 const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) => {
-  const { setLoader } = useAppContexts();
+  const {loader,  setLoader } = useAppContexts();
   const { user } = useAuthContexts();
   const [sliders, setSliders] = useState<slidersType[]>([]);
   const [imageLoadingMap, setImageLoadingMap] = useState<Record<string, boolean>>({});
@@ -149,15 +148,7 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
     : [];
 
 
-
-
-
-
-
-
-
-
-    
+ 
   return (
     <View style={styles.container}>
       <StatusBar
@@ -166,26 +157,27 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
       />
       
       <UserHomeHeader navigation={navigation} route={route} />
+                        
+      <View style={styles.carouselContainer}>
+        <Carousel
+          autoPlay
+          autoPlayInterval={2000}
+          data={sliders}
+          loop
+          pagingEnabled
+          snapEnabled
+          width={width}
+          height={200}
+          style={{ width }}
+          mode='parallax'
+          modeConfig={{
+            parallaxScrollingScale: 0.9,
+            parallaxScrollingOffset: 50,
+          }}
+          renderItem={renderItem}
+        />
+      </View>
 
-            <View style={styles.carouselContainer}>
-              <Carousel
-                autoPlay
-                autoPlayInterval={2000}
-                data={sliders}
-                loop
-                pagingEnabled
-                snapEnabled
-                width={width}
-                height={200}
-                style={{ width }}
-                mode='parallax'
-                modeConfig={{
-                  parallaxScrollingScale: 0.9,
-                  parallaxScrollingOffset: 50,
-                }}
-                renderItem={renderItem}
-              />
-            </View>
       <FlatList
        data={menuBlocks}
         keyExtractor={(item) => item.id.toString()}
@@ -200,12 +192,8 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
         )}
         ListFooterComponent={
           !user?.isApproved ? (
-            <View style={{ marginTop: 20 }}>
-              <ErrMsg
-                errText={'আপনার একাউন্টটি এপ্রোভ করার জন্য কর্তপক্ষের সাথে যোগাযোগ করুন!'}
-                fontFamily={'HindSiliguri-SemiBold'}
-                duration={500}
-              />
+            <View style={{justifyContent:'center', alignItems:'center'}}>
+              <Text className='text-gray-500 font-HindSemiBold text-base text-justify px-10 py-10'>আপনার একাউন্টটি এপ্রোভ করার জন্য কর্তৃপক্ষের সাথে যোগাযোগ করুন!</Text>
             </View>
           ) : null
         }

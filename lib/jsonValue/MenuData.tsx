@@ -4,7 +4,7 @@ export const studentManagement = [
 export const newStuDataManagement = [
     {id:1, menuTitle:'এড নিউ', icon:'addusergroup', route:'AddmissionNavigator', routeStatus: true},
     {id:2, menuTitle:'আমার সংগ্রহ', icon:'infocirlce', route:'NewStuInfoByTeacher', routeStatus: true},
-];
+]; 
 export const resultManagementPrimary = [
     {id:1, menuTitle:'ফলাফল', icon:'contacts', route:'GetResultPrimary', routeStatus: true}
 ];

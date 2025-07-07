@@ -52,7 +52,7 @@ export const genderData = [
     {id: 1, label: 'ছাত্র', value: 'ছাত্র'},
     {id: 2, label: 'ছাত্রী', value: 'ছাত্রী'}
 ]
-
+ 
 export const addPointData = [
     {id: 1, label: 'এক জন', value: '1'},
     {id: 2, label: 'দুই জন', value: '0.5'},

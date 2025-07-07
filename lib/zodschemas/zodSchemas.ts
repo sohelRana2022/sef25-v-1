@@ -3,6 +3,7 @@ import { z } from "zod";
 
 // creating a schema for signup form
 export const UserInfoSchema = z.object({
+  uid: z.string().optional(),
   nameBang: z.string().min(1).regex(/^([\u0980-\u09FF]+)( [\u0980-\u09FF]+)*$/,{message:'বাংলায় লিখুন এবং প্রথমে ও শেষে স্পেস দিবেন না!!'}),
   nameEng: z.string().min(1).regex(/^([A-Z][a-z]*)( [A-Z][a-z]*)*$/,{message:'ইংরেজিতে লিখুন এবং প্রথমে ও শেষে স্পেস দিবেন না!'}),
   contact: z.string().regex(/(^(01){1}[3-9]{1}(\d){8})$/,{message:'মোবাইল নাম্বারটি সঠিক নয়!'}),
@@ -38,6 +39,22 @@ export const userFromServerSchema = z.object({
     password: z.string(),
 })
 export type UserfromServerType = z.infer<typeof userFromServerSchema>
+
+//creating user Schema from server
+export const userToServerSchema = z.object({
+    nameBang: z.string(),
+    nameEng: z.string(),
+    contact: z.string(),
+    title: z.string(),
+    role: z.string(),
+    branch: z.string(),
+    isApproved: z.boolean(),
+    imageId: z.string(),
+    relatedClass: z.string(),
+    email: z.string(),
+    password: z.string(),
+})
+export type UserToServerType = z.infer<typeof userToServerSchema>
 
 
 
@@ -265,13 +282,13 @@ export const addInfoSchema = z.object({
     if (typeof val === 'string' && val.trim() === '') return undefined;
     const num = Number(val);
     return isNaN(num) ? undefined : num;
-  }, z.number({ required_error: "সর্বমোট ভর্তি-ফি প্রয়োজন" }).min(1, "সর্বমোট ভর্তি-ফি অবশ্যই ১ বা তার বেশি হতে হবে")),
+  }, z.number({ required_error: "সর্বমোট ভর্তি-ফি প্রয়োজন" }).min(100, "সর্বমোট ভর্তি-ফি অবশ্যই ১00 বা তার বেশি হতে হবে")),
 
   add_point: z.preprocess((val) => {
     if (typeof val === 'string' && val.trim() === '') return undefined;
     const num = Number(val);
     return isNaN(num) ? undefined : num;
-  }, z.number({ required_error: "অবদান সংখ্যা প্রয়োজন" }).min(1, "অবদান সংখ্যা অবশ্যই ১ বা তার বেশি হতে হবে")),
+  }, z.number({ required_error: "অবদান সংখ্যা প্রয়োজন" }).min(0.25).max(1)),
 
   commission: z.number(),
   is_admitted: z.boolean(),

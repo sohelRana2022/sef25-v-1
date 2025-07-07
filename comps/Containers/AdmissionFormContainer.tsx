@@ -17,7 +17,9 @@ export default AdmissionFormContainer;
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'flex-start', 
-    alignItems: 'center'
+    flex:1,
+    justifyContent: 'center',
+    paddingHorizontal:30,
+    backgroundColor:'#FFF'
   }
 });

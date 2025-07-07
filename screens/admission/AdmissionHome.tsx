@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Text } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +17,7 @@ interface AddmissionHomeProps {
 }
 
 const AdmissionHome:React.FC<AddmissionHomeProps>  = ({ navigation}) => {
-  const { personalInfo, setPersonalInfo} = useAdmissionContexts();
+  const {loader, setLoader,  personalInfo, setPersonalInfo} = useAdmissionContexts();
   const { control, handleSubmit, reset, formState: { errors } } = useForm<PersonalInfoType>({
     resolver: zodResolver(PersonalInfoSchemama),
     defaultValues: personalInfo || {
@@ -45,14 +45,22 @@ useFocusEffect(
   }, [personalInfo])
 );
   const next = (data: PersonalInfoType) => {
+    setLoader(true);
     setPersonalInfo(data);
-    navigation.navigate('ParentsAndContact');
+    navigation.navigate('ParentsAndContact')
   };  
 
   
 
   return (
     <View style={{ flex: 1, justifyContent:'center', alignItems:'center', alignContent:'center', backgroundColor:"#FFF"}}>
+        {loader && (
+          <View style={styles.loaderOverlay}>
+            <ActivityIndicator size="large" color="#FFF" />
+          </View>
+        )}
+        
+        
         <View style={{ width:'80%'}}>
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -128,5 +136,17 @@ useFocusEffect(
 };
 
 export default AdmissionHome;
-
+const styles= StyleSheet.create({
+    loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor:'rgba(0, 0, 0, 0.5)',
+    zIndex:100
+  }
+})
 

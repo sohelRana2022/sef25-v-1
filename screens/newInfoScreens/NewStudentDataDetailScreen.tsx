@@ -9,7 +9,7 @@ import { studentDataType } from '../../lib/dTypes/StudentDataType';
 // 1. Define your stack route types
 type RootStackParamList = {
   NewStudentDataDetailScreen: {
-    item: studentDataType;
+    stu_data: studentDataType
   };
 };
 
@@ -30,24 +30,22 @@ interface NewStudentDataDetailScreenProps {
 }
 
 const NewStudentDataDetailScreen: React.FC<NewStudentDataDetailScreenProps> = ({
-  route,
+  route,navigation
 }) => {
-  const { item } = route.params;
-
+  const item = route.params.stu_data;
+ 
   return (
-    <ScrollView>
+
       <View style={styles.container}>
-        <Card style={styles.card}>
+       
           <Image
             source={require('../../assets/images/schoolName.jpg')}
             style={styles.headerImage}
             resizeMode="contain"
           />
-          <Card.Title
-            title="শিক্ষার্থীর বিস্তারিত তথ্য"
-            titleStyle={styles.title}
-          />
-          <Card.Content>
+          <Text className='text-black text-center font-HindSemiBold text-lg pb-2'>শিক্ষার্থীর বিস্তারিত তথ্য</Text>
+
+          
             {([
               
               [1, 'শিক্ষার্থীর নাম', item.stu_name_bn],
@@ -65,15 +63,17 @@ const NewStudentDataDetailScreen: React.FC<NewStudentDataDetailScreenProps> = ({
               [13, 'তথ্য সংগ্রহের তারিখ', formatedDateTime(item.send_date)],
               [14, 'তথ্য সংগ্রহকারী', item.ref_person],
             ] as [number, string, any][]).map(([_, label, value], idx) => (
+            
               <View key={idx} style={styles.infoRow}>
                 <Text style={styles.label}>{label}</Text>
                 <Text style={styles.value}>{value}</Text>
               </View>
+
             ))}
-          </Card.Content>
-        </Card>
-      </View>
-    </ScrollView>
+      
+        </View>
+    
+
   );
 };
 
@@ -81,24 +81,16 @@ export default NewStudentDataDetailScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFF',
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
-    margin: 20,
-  },
-  card: {
-    width: '100%',
-    margin: 5,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    padding:40
   },
   headerImage: {
-    width: '95%',
+    width: '85%',
     height: 45,
-    alignSelf: 'center',
-    marginBottom: 10,
+    alignSelf: 'center'
   },
   title: {
     textAlign: 'center',
@@ -108,19 +100,19 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderBottomWidth: 1,
     borderColor: '#eee',
   },
   label: {
     color: 'black',
     fontFamily: 'HindSiliguri-SemiBold',
-    width: '45%',
+    width: '40%',
   },
   value: {
     color: 'black',
     fontFamily: 'HindSiliguri-Regular',
-    width: '55%',
+    width: '60%',
     textAlign: 'right',
   },
 });

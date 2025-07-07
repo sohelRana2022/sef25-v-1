@@ -33,7 +33,7 @@ const appStackData: authStackInfo[] = [
   {name: 'GetResultHighSection', component: GetResultHighSection, hasHeader: true, title: 'ফলাফল ডাউনলোড', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'GetMarkSubWise', component: GetMarkSubWise, hasHeader: true, title: 'বিষয়ভিত্তিক নম্বর পত্র', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
   {name: 'ResultSheetPrimary', component: ResultSheetPrimary, hasHeader: true, title: 'নম্বরপত্র', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'},
-  {name: 'NewStuInfoByTeacher', component: NewStuInfoByTeacher, hasHeader: true, title: 'শিক্ষকভিত্তিক সংগ্রহ তালিকা', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'}  
+  {name: 'NewStuInfoByTeacher', component: NewStuInfoByTeacher, hasHeader: true, title: 'সংগ্রহ তালিকা', height: 60, backgroundColor: '#0B2447', fontFamily: 'HindSiliguri-SemiBold', headerTintColor: '#fff'}  
 ];
 
 

@@ -38,7 +38,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       navigation.replace('UserHomeScreen'); // ✅ Success: redirect
     }
   };
-  console.log(loader)
+  
   return (
     <View style={{ flex: 1, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }}>
       {loader && (

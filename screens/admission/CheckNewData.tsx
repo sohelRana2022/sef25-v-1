@@ -10,7 +10,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAdmissionContexts } from '../../contexts/AdmissionContext';
 import { primaryContactSchema, primaryContactType } from '../../lib/zodschemas/zodSchemas';
 import { RouteProp } from '@react-navigation/native';
-
+import Icon from 'react-native-vector-icons/AntDesign';
+import { useAuthContexts } from '../../contexts/AuthContext';
 
 interface CheckDataProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -18,6 +19,7 @@ interface CheckDataProps {
 }
 
 const CheckNewData:React.FC<CheckDataProps>  = ({ navigation}) => {
+  const {user} = useAuthContexts();
   const {primaryContact, setPrimaryContact} = useAdmissionContexts();
   const [isExist, setIsExist] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false)
@@ -44,7 +46,7 @@ const check = async (data:primaryContactType) => {
         .get()
     ]);
 
-    if (!match1.empty || !match2.empty) {
+    if ((!match1.empty || !match2.empty) && user?.role !== 'admin') {
       setLoading(false)
       setIsExist(true);
       setMsg('এই মোবাইল নাম্বারের বিপরীতে শিক্ষার্থীর তথ্য ইতোমধ্যে ডাটাবেইজে এন্ট্রি আছে!');
@@ -91,7 +93,8 @@ const check = async (data:primaryContactType) => {
         )}
 
 
-        <Text className='text-black text-lg font-HindSemiBold'>তথ্য যাচাই করুন</Text>
+        <Icon name="warning" size={30} color="orange" />
+        <Text className='flex-start text-gray-500 text-xs font-HindSemiBold pt-5 w-[60%] text-justify'>শিক্ষার্থীর পিতার সচল ফোন নাম্বারটি এখানে লিখুন । ফোন নাম্বার ভুল দিলে এবং তা যদি প্রমাণিত হয় তাহলে আপনার এই তথ্য স্বয়ংক্রিয়ভাবে ডাটাবেইজ থেকে মুছে যাবে ।</Text>
         <View className='w-[80%] px-10'>
             
             <ControlledInput 
@@ -105,7 +108,7 @@ const check = async (data:primaryContactType) => {
             
             <Button className='my-5' onPress={handleSubmit(check)} mode={"contained"} >
 
-            যাচাই
+            পরবর্তী
             </Button>
         </View>
 

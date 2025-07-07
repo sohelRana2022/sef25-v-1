@@ -1,18 +1,14 @@
-import axios from 'axios';
+
 import React, { useEffect, useState } from 'react';
-import {Alert, FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import { INFO_API_URL } from '../../apis/config';
-import { insertData, readAllData, deleteData } from '../../lib/crudFuncs/crud';
+import {ActivityIndicator, ScrollView, Text, View} from 'react-native';
 import { Card, DataTable } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
 import { useAppContexts } from '../../contexts/AppContext';
 import { useAuthContexts } from '../../contexts/AuthContext';
-import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
-import { countByPropWithRank } from '../../lib/helpers/helpers';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { studentDataType } from '../../lib/dTypes/StudentDataType';
-const uData = {"contact": "01740096872", "email": "sof@gmail.com", "id": "5K5CM5vrnBdoHIYGgANJ", "imageId": "FsjkwjvzkzigammKzv", "role": "Director", "sefBranch": "তারাকান্দি", "userName": "রবিন রানা"}
+import { studentDataType, summary } from '../../lib/dTypes/StudentDataType';
+import { summarizeByRefPerson } from '../../lib/helpers/helpers';
 interface StatisticsScreenProps{
     navigation: NativeStackNavigationProp<any, any>;
     route: RouteProp<any, any>;
@@ -20,47 +16,9 @@ interface StatisticsScreenProps{
 }
 
 
-
-type Summary = {
-  ref_uid: string;
-  ref_person: string;
-  total: number;
-  admitted: number;
-  posibility100: number;
-  total_add: number;
-  total_com: number
-};
-
-const summarizeByRefPerson = (data: studentDataType[]): Summary[] => {
-  const grouped = data.reduce<Record<string, Summary>>((acc, curr) => {
-    const person = curr.ref_person || 'Unknown';
-    const ref_uid = curr.ref_uid || 'Unknown';
-    if (!acc[ref_uid]) {
-      acc[ref_uid] = {
-        ref_person: person,
-        ref_uid: ref_uid,
-        total: 0,
-        admitted: 0,
-        posibility100: 0,
-        total_add: 0,
-        total_com: 0
-      };
-    }
-
-    acc[ref_uid].total += 1;
-    if (curr.is_admitted) acc[ref_uid].admitted += 1;
-    if (Number(curr.posibility) === 100) acc[ref_uid].posibility100 += 1;
-    acc[ref_uid].total_add += Number(curr.add_point || 0); // add_point যোগ
-    acc[ref_uid].total_com += Number(curr.commission || 0); // commission যোগ
-    return acc;
-  }, {});
-
-  return Object.values(grouped).sort((a, b) => b.admitted - a.admitted);
-};
-
 const StatisticsScreen = (props: StatisticsScreenProps) => {
   const [allData, setAllData] = useState<studentDataType[]>([]);
-  const [summeryData, setSummeryData] = useState<Summary[]>([]);
+  const [summeryData, setSummeryData] = useState<summary[]>([]);
   const {navigation, route}= props;
   const { loader, setLoader } = useAppContexts();
   const {user} = useAuthContexts();
@@ -95,6 +53,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
 
         const newStuData = snapshot.docs.map(doc => {
             const data = doc.data();
+            const send_date = data?.send_date.toDate();
               return {
                 uid: doc.id,
                 stu_name_bn: data.stu_name_bn,
@@ -114,7 +73,7 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
                 ref_person: data.ref_person,
                 sef_branch: data.sef_branch,
                 is_admitted: data.is_admitted,
-                send_date: data.add_date,
+                send_date: send_date,
                 add_point: data.add_point,
                 is_active: data.is_active,
                 valid_days: data.valid_days,
@@ -123,13 +82,13 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
                 
               };
           });
-        setAllData(newStuData);
         const countedData = summarizeByRefPerson(newStuData)
-        
         setSummeryData(countedData)
-        setLoader(false);
+        
     } catch (error) {
       console.log(error)
+    } finally{
+      setLoader(false);
     }
 
 
@@ -139,13 +98,20 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
   useEffect(()=> {
     getChartData();
   },[])
+
+
   return (
     <>
-    {loader ? <LoaderAnimation/> : 
+    {loader ? 
+    
+    <View className='justify-center items-center flex-1'>
+      <ActivityIndicator color={'#000'} size="large"/>
+    </View>
+    
+    : 
 
 
        <StatisticTable
-          allData={allData}
           data={summeryData}
           navigation={navigation}
           route={route}
@@ -160,62 +126,66 @@ export default StatisticsScreen;
 
 
 type StatisticTableProps = {
-  allData: studentDataType[];
-  data: Summary[];
+  data: summary[];
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
 };
 
 
 const StatisticTable = ({
-  allData,
   data,
   navigation,
   route,
 }: StatisticTableProps) => {
   const { user } = useAuthContexts();
-  const [page, setPage] = React.useState<number>(0);
-  const [numberOfItemsPerPageList] = React.useState([5,8,10]);
-  const [itemsPerPage, onItemsPerPageChange] = React.useState(
-    numberOfItemsPerPageList[0]
-  );
-
-  const from = page * itemsPerPage;
-  const to = Math.min((page + 1) * itemsPerPage, data.length);
-
-  React.useEffect(() => {
-    setPage(0);
-  }, [itemsPerPage]);
 
   return (
     <DataTable>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
-        <View style={{ width: 320 }}>
-          <DataTable.Pagination
-            page={page}
-            numberOfPages={Math.ceil(data.length / itemsPerPage)}
-            onPageChange={(page) => setPage(page)}
-            label={`${from + 1}-${to} of ${data.length}`}
-            numberOfItemsPerPageList={numberOfItemsPerPageList}
-            numberOfItemsPerPage={itemsPerPage}
-            onItemsPerPageChange={onItemsPerPageChange}
-            showFastPaginationControls
-            selectPageDropdownLabel={'Rows per page'}
-          />
-        </View>
-      </View>
 
 
-        <DataTable.Header>
-          <DataTable.Title style={{ flex: 0.5 }}>ক্রম</DataTable.Title>
-          <DataTable.Title style={{ flex: 3 }}>শিক্ষার্থীর নাম </DataTable.Title>
-          <DataTable.Title style={{ flex: 1 }}>মোট</DataTable.Title>
-          <DataTable.Title style={{ flex: 1}}>১০০%</DataTable.Title>
-          <DataTable.Title style={{ flex: 1}}>ভর্তি</DataTable.Title>
+
+        <DataTable.Header
+          style={{backgroundColor:'#ddd'}}
+        >
+          <DataTable.Title style={{ flex: 1 }}>
+             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingLeft:10 }}>
+              <Text className="text-left text-black font-HindSemiBold">ক্রম</Text>
+            </View>            
+          </DataTable.Title>
+          <DataTable.Title style={{ flex: 3 }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-left text-black font-HindSemiBold">শিক্ষকের নাম</Text>
+            </View>             
+          </DataTable.Title>
+          <DataTable.Title style={{ flex: 1 }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">মোট</Text>
+            </View> 
+          </DataTable.Title>
+          <DataTable.Title style={{ flex: 1.5 }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">এই সপ্তাহ</Text>
+            </View>             
+          </DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">১০০%</Text>
+            </View>             
+          </DataTable.Title>
+          <DataTable.Title style={{ flex: 1}}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingLeft:10 }}>
+              <Text className="text-center text-black font-HindSemiBold">ভর্তি</Text>
+            </View>  
+          </DataTable.Title>
         </DataTable.Header>
 
-      {data.slice(from, to).map((item, index) => (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+      >
+
+      {data.map((item, index) => (
         <DataTable.Row 
+            style={{backgroundColor: index % 2 === 0 ? '#FFF' : '#eee'}} 
             key={item.ref_uid} 
             onPress={()=>{
                 user?.uid === item.ref_uid || user?.role === 'admin' ? 
@@ -227,15 +197,40 @@ const StatisticTable = ({
         
 
         >
-          <DataTable.Cell style={{ flex: 0.5 }}>{index+1}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 3 }}>{item.ref_person}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>{item.total}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>{item.posibility100}</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>{item.total_add}</DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>
+             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">{index+1}</Text>
+            </View>              
+          </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 3 }}>
+             <View style={{ flex: 3, justifyContent: 'center', alignItems: 'flex-start'}}>
+              <Text className="text-black font-HindSemiBold">{item.ref_person}</Text>
+            </View>             
+          </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }} >
+             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-black font-HindSemiBold">  {item.total}</Text>
+            </View>            
+          </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1.5 }} >
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">{item.prev7DayaData}</Text>
+            </View>            
+          </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">{item.posibility100}</Text>
+            </View>
+          </DataTable.Cell>
+          <DataTable.Cell style={{ flex: 1 }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text className="text-center text-black font-HindSemiBold">{item.total_add}</Text>
+            </View> 
+            </DataTable.Cell>
         </DataTable.Row>
       ))}
 
-
+      </ScrollView>
     </DataTable>
   );
 };
