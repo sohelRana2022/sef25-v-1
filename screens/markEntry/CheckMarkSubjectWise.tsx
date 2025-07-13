@@ -7,7 +7,7 @@ import {
   Image,
   FlatList,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthContexts } from '../../contexts/AuthContext';
 import { Card, Button } from 'react-native-paper';
 import { useForm } from 'react-hook-form';
@@ -22,7 +22,7 @@ import {
   getSubjectMarkTypeHigh,
 } from '../../lib/zodschemas/zodSchemas';
 import CustomPicker from '../../comps/pickers/CustomPicker';
-import { classData, subName } from '../../lib/jsonValue/PickerData';
+import { classData, classes, subName } from '../../lib/jsonValue/PickerData';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 const { width } = Dimensions.get('window');
 
@@ -37,26 +37,15 @@ type StudentMark = {
 
 const CheckMarkSubjectWise = () => {
   const [allData, setAllData] = useState<StudentMark[]>([]);
-  const [subjectName, setSubjectName] = useState('');
   const [fetchError, setFetchError] = useState('');
   const { loader, setLoader } = useAppContexts();
   const { user } = useAuthContexts();
-
-  const relatedClassMap: Record<string, string> = {
-    ষষ্ঠ: 'Six',
-    অষ্টম: 'Eight',
-    সপ্তম: 'Seven',
-    নবম: 'Nine',
-    দশম: 'Ten',
-  };
-
-  // Map relatedClass from user context or fallback to "N/A"
-  const defaultClass = relatedClassMap[user?.relatedClass || ''] || 'N/A';
 
   // React Hook Form setup
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
     watch,
   } = useForm<getSubjectMarkTypeHigh>({
@@ -70,16 +59,16 @@ const CheckMarkSubjectWise = () => {
 
   const Submit = async (data: getSubjectMarkTypeHigh) => {
     try {
+      setFetchError('');
       setLoader(true);
       setFetchError('');
       const res = await axios.get(
-        `${getMarkSubjectWise}?class=${relatedClassMap[data.class]}&subject=${data.subject}`
+        `${getMarkSubjectWise}?class=${data.class}&subject=${data.subject}`
       );
-      if (res.data?.success && Array.isArray(res.data.data)) {
+      if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
         setAllData(res.data.data);
-        setSubjectName(res.data.subject_name);
       } else {
-        setFetchError('এখনো ফলাফল প্রকাশিত হয়নি।');
+        setFetchError('সঠিক শ্রেণী ও বিষয়ের নাম বাছাই করুন । ');
         setAllData([]);
       }
     } catch (err) {
@@ -89,6 +78,20 @@ const CheckMarkSubjectWise = () => {
       setLoader(false);
     }
   };
+
+useEffect(() => {
+  const fetchResult = async () => {
+    const currentValues = getValues();
+    Submit(currentValues)
+  };
+
+  fetchResult();
+}, [selectedClass, selectedSubject]);
+
+
+
+
+
 
     const listHeader=()=>{
       return(
@@ -105,6 +108,7 @@ const CheckMarkSubjectWise = () => {
     }
 
     const renderItem = ({ item }: { item: StudentMark; index: number })=>{
+     
       return (
         <View className='w-[95%] mx-2 border-dashed border-b flex-row px-2 bg-gray-200 py-1 justify-center items-center'>
             <View
@@ -126,7 +130,7 @@ const CheckMarkSubjectWise = () => {
         <Card.Content>
           <CustomPicker
             control={control}
-            data={classData}
+            data={classes}
             name="class"
             pickerTitle="শ্রেণী"
           />

@@ -68,9 +68,8 @@ const SignUpScreen:React.FC<SignUpScreenProps>  = ({ navigation })=> {
         style={{padding:40, backgroundColor:'#FFF', flex:1, justifyContent:'center'}}
       >
           {loader && (
-            <View style={styles.loaderOverlay}>
-              <ActivityIndicator size="large" color="#FFF" />
-              <Text className='text-base font-HindRegular text-[#FFF] pt-5'>অপেক্ষা করুন .....!</Text>
+            <View className='absolute top-5 right-5'>
+              <ActivityIndicator size="large" color="#000" />
             </View>
           )}
           <View style={{ alignItems: 'center', marginVertical:5}}>
@@ -154,16 +153,15 @@ const SignUpScreen:React.FC<SignUpScreenProps>  = ({ navigation })=> {
 export default SignUpScreen;
 
 const styles = StyleSheet.create({
-    loaderOverlay: {
-    flex:1,  
+loaderOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     height: '100%',
     width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor:'rgba(0, 0, 0, 0.5)',
-    zIndex:100
-  }
+    alignItems: 'center', // Centers horizontally
+    justifyContent: 'center', // Centers vertically
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 100,
+  },
 })

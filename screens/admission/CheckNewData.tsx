@@ -49,7 +49,7 @@ const check = async (data:primaryContactType) => {
     if ((!match1.empty || !match2.empty) && user?.role !== 'admin') {
       setLoading(false)
       setIsExist(true);
-      setMsg('এই মোবাইল নাম্বারের বিপরীতে শিক্ষার্থীর তথ্য ইতোমধ্যে ডাটাবেইজে এন্ট্রি আছে!');
+      setMsg('এই শিক্ষার্থীর তথ্য ইতোমধ্যে ডাটাবেইজে এন্ট্রি আছে!');
       return;
     }
 
@@ -94,7 +94,7 @@ const check = async (data:primaryContactType) => {
 
 
         <Icon name="warning" size={30} color="orange" />
-        <Text className='flex-start text-gray-500 text-xs font-HindSemiBold pt-5 w-[60%] text-justify'>শিক্ষার্থীর পিতার সচল ফোন নাম্বারটি এখানে লিখুন । ফোন নাম্বার ভুল দিলে এবং তা যদি প্রমাণিত হয় তাহলে আপনার এই তথ্য স্বয়ংক্রিয়ভাবে ডাটাবেইজ থেকে মুছে যাবে ।</Text>
+        <Text className='flex-start text-gray-500 text-xs font-HindSemiBold pt-5 w-[60%] text-justify'>শিক্ষার্থীর পিতার সচল ফোন নাম্বারটি এখানে লিখুন। এই ফোন নাম্বার ভুল হলে তথ্যটি আপনার নয় বলে বিবেচিত হবে। এক্ষেত্রে, কোন অজুহাত গ্রহণ করা হবে না। </Text>
         <View className='w-[80%] px-10'>
             
             <ControlledInput 

@@ -7,9 +7,8 @@ export const Mark_API = "https://script.google.com/macros/s/AKfycbzB_SebAybCHkz6
 export const STLIST_FOR_SEND_MARK = "https://script.google.com/macros/s/AKfycbwIzMSO9SvVK-52uCe2KB0liDKYSgInKpZvG9WfaRvnY_C_4QdKIsnA3bvPldJSpHmK/exec";
 export const SLIDERS_API = "https://script.google.com/macros/s/AKfycbzcz1syZ-8V6KTZUWRl1Vd27qKOUd085g_bVCxWMpFFtjuCE9BekH_JyMz71cZaIdDl/exec";
 export const IMG_API = 'https://drive.google.com/uc?export=view&id=';
-export const GET_RESULT_API = 'https://script.google.com/macros/s/AKfycbyLdreIGIdb9z1rsJi00gCSKTCOeyYVQiJLmpS2tb63uACd-teCK_6b_PztbGHb9T3h/exec';
-export const getMarkSubjectWise = 'https://script.google.com/macros/s/AKfycbx0X69xV3D6PbBxSjfS2aZmzbwDFHL4J_QQmVnsmMjxiukCVgiXsNBOxsoq_9pEhvB19g/exec';
+//API Name getResults
+export const GET_RESULT_API = 'https://script.google.com/macros/s/AKfycbzRl8SA6OSZHmUU_pK3WxCk6x6TwrV36Zuqvz44u6z8DGiUt9N8h7OK5s-LjB10p-gv/exec';
+export const getMarkSubjectWise = 'https://script.google.com/macros/s/AKfycbxw_8apmbAMuMmF1V5DedCGXoZK3qY7ibfSn2H_eNjW25DC4wkcz6-YPPnVeQLalRs7Zw/exec';
 export const CRUD_API = 'https://script.google.com/macros/s/AKfycbwzQ40mLpcTiNl1rSd-sTwgq7DXnou8V6KCoyqqZDxv1_FG1QYniZ0C6NnOqZkAzRo3/exec';
-
-
 

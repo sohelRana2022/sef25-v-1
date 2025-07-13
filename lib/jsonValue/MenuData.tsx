@@ -11,7 +11,7 @@ export const resultManagementPrimary = [
 export const resultManagementHigh = [
     {id:1, menuTitle:'মার্ক এন্ট্রি', icon:'edit', route:'SendMarkScreen', routeStatus: true},
     {id:2, menuTitle:'নম্বর যাচাই', icon:'check', route:'GetMarkSubWise', routeStatus: true},
-    {id:3, menuTitle:'ফলাফল', icon:'contacts', route:'GetResultHighSection', routeStatus: true},
+    {id:3, menuTitle:'ফলাফল', icon:'contacts', route:'ResultDownloadScreenHigh', routeStatus: true},
 ];
 
 export const UserManagement = [

@@ -1,11 +1,9 @@
 import {
   ActivityIndicator,
-  Modal,
   StyleSheet,
   Text,
   View,
   Dimensions,
-  FlatList,
   Image,
   Keyboard
 } from 'react-native';
@@ -59,7 +57,7 @@ type MarkItem = {
     ten: number | null;
     total: number | null;
     twenty: number | null;
-    writen: number | null;
+    cq: number | null;
   };
 };
 
@@ -167,6 +165,7 @@ const GetResultHighSection = () => {
       );
     } else {
       const mark = item.data;
+      console.log(mark)
       return (
         <View style={styles.card}>
           <Text className='text-black text-center font-HindBold pt-2 pb-2 mt-5 mb-5 text-xl'>
@@ -175,7 +174,7 @@ const GetResultHighSection = () => {
           {([
             [1, 'বিষয়কোড', getSubjectCode(mark, resultData.SIF.section)],
             [2, 'বিষয়ের নাম', getSubjectName(mark, resultData.SIF.section)],
-            [3, 'লিখিত', formatNumber(mark.writen)],
+            [3, 'লিখিত', formatNumber(mark.cq)],
             [4, 'নৈর্ব্যক্তিক', formatNumber(mark.mcq)],
             [5, 'ব্যবহারিক', formatNumber(mark.prac)],
             [6, 'মোট এর ৭০%', formatNumber(mark.seventy)],
@@ -197,10 +196,7 @@ const GetResultHighSection = () => {
 
   const {
     control,
-    handleSubmit,
     watch,
-    setValue,
-    reset,
     formState: { errors }
   } = useForm<resultInfoTypeH>({
     resolver: zodResolver(resultInfoSchemaH),
@@ -220,6 +216,7 @@ const GetResultHighSection = () => {
       try {
         setLoader(true);
         const res = await axios.get(`${GET_RESULT_API}?class=${defaultClass}`);
+        
         if (res.data?.success && Array.isArray(res.data.data)) {
           setAllData(res.data.data);
         } else {
@@ -261,6 +258,8 @@ const GetResultHighSection = () => {
     resultData && resultData.SIF && Array.isArray(resultData.marks)
       ? [{ type: 'SIF', data: resultData.SIF }, ...resultData.marks.map((item: any) => ({ type: 'MARK', data: item }))]
       : [];
+
+
 
   return (
     <View style={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 10 }}>

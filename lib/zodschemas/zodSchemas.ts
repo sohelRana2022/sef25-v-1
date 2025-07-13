@@ -215,15 +215,14 @@ export const resultInfoSchema = z.object({
 export type resultInfoType = z.infer<typeof resultInfoSchema>;
 
 // Get Result Info schema
-export const resultInfoSchemaH = z.object({
-  studentId: z.string().regex(/(^(\d){8})$/),
+export const resultInfoSchemaHigh = z.object({
+  stuId: z.string().regex(/(^(\d){8})$/),
   examName: z.string(),
-  class: z.string(),
-  sefBranch: z.string(),
+  stuClass: z.string(),
   examYear: z.string()
 });
 
-export type resultInfoTypeH = z.infer<typeof resultInfoSchemaH>;
+export type resultInfoTypeHigh = z.infer<typeof resultInfoSchemaHigh>;
 
 
 

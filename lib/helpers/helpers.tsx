@@ -212,7 +212,47 @@ export const summarizeByRefPerson = (data: studentDataType[]): summary[] => {
   return Object.values(grouped).sort((a, b) => b.admitted - a.admitted);
 };
 
+
+
+
+
+
+type DataItem = {
+  type: "SIF" | "MARK";
+  data: {
+    sc?: string; // only present in MARK
+    [key: string]: any;
+  };
+};
+
+const sortSubjects = (
+  data: DataItem[],
+  customOrder: string[]
+): DataItem[] => {
+  // Find the SIF entry
+  const sifEntry = data.find(item => item.type === "SIF");
+
+  // Filter MARK entries
+  const markEntries = data.filter(item => item.type === "MARK");
+
+  // Sort MARK entries based on customOrder
+  const sortedMarks = markEntries.sort((a, b) => {
+    const indexA = customOrder.indexOf(a.data.sc || "");
+    const indexB = customOrder.indexOf(b.data.sc || "");
+    return indexA - indexB;
+  });
+
+  // Return array with SIF at the front
+  return sifEntry ? [sifEntry, ...sortedMarks] : sortedMarks;
+}
+
+
+
+
+
+
 export {
+  sortSubjects,
   getRemainingDays, 
   calculateValidDays, 
   splitByFirstSpace, 

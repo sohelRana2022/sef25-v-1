@@ -81,14 +81,14 @@ useFocusEffect(
               placeholder={""}
               label={"পূর্ণনাম (ইংরেজি)"}
               style={{ backgroundColor: "#FFF", fontFamily: 'HindSiliguri-SemiBold'}}
-            />
-        <ControlledInput 
-          control={control}
-          name={"prev_school"}
-          placeholder={""}
-          label={"পূর্বের বিদ্যালয়ের নাম"}
-          style={{ backgroundColor: "#FFF", fontFamily: 'HindSiliguri-SemiBold'}}
-        />
+              />
+          <ControlledInput 
+            control={control}
+            name={"prev_school"}
+            placeholder={""}
+            label={"পূর্বের বিদ্যালয়ের নাম"}
+            style={{ backgroundColor: "#FFF", fontFamily: 'HindSiliguri-SemiBold'}}
+          />
           <CustomPicker 
             control={control}
             data={classData}
