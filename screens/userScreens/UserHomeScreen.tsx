@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,18 +7,18 @@ import {
   Image,
   FlatList,
   ActivityIndicator,
-  Text
+  Text,
 } from 'react-native';
 import UserHomeHeader from '../../comps/headers/UserHomeHeader';
 import MenuList from '../../comps/homeScreen/MenuList';
-import { theme } from '../../lib/themes/theme';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
-import { useAuthContexts } from '../../contexts/AuthContext';
+import {theme} from '../../lib/themes/theme';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteProp} from '@react-navigation/native';
+import {useAuthContexts} from '../../contexts/AuthContext';
 import Carousel from 'react-native-reanimated-carousel';
 import axios from 'axios';
-import { IMG_API, SLIDERS_API } from '../../apis/config';
-import { useAppContexts } from '../../contexts/AppContext';
+import {IMG_API, SLIDERS_API} from '../../apis/config';
+import {useAppContexts} from '../../contexts/AppContext';
 
 export interface MenuItemType {
   id: number;
@@ -29,7 +29,7 @@ export interface MenuItemType {
 }
 
 export interface MenuBlockType {
-  id: number,
+  id: number;
   title: string;
   data: MenuItemType[];
 }
@@ -39,7 +39,7 @@ import {
   resultManagementHigh,
   resultManagementPrimary,
   studentManagement,
-  UserManagement
+  UserManagement,
 } from '../../lib/jsonValue/MenuData';
 
 interface slidersType {
@@ -48,51 +48,52 @@ interface slidersType {
   sliderId: string;
 }
 
-type UserHomeScreenRouteProp = RouteProp<{
-  UserHomeScreen: {
-    userData: {
-      branch: string;
-      contact: number;
-      email: string;
-      id: string;
-      imageId: string;
-      role: string;
-      teaClass: string;
-      userName: string;
+type UserHomeScreenRouteProp = RouteProp<
+  {
+    UserHomeScreen: {
+      userData: {
+        branch: string;
+        contact: number;
+        email: string;
+        id: string;
+        imageId: string;
+        role: string;
+        teaClass: string;
+        userName: string;
+      };
     };
-  };
-}, 'UserHomeScreen'>;
+  },
+  'UserHomeScreen'
+>;
 
 interface UserHomeScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
   route: UserHomeScreenRouteProp;
 }
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-
-
-const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) => {
-  const {loader,  setLoader } = useAppContexts();
-  const { user } = useAuthContexts();
+const UserHomeScreen: React.FC<UserHomeScreenProps> = ({navigation, route}) => {
+  const {loader, setLoader} = useAppContexts();
+  const {user} = useAuthContexts();
   const [sliders, setSliders] = useState<slidersType[]>([]);
-  const [imageLoadingMap, setImageLoadingMap] = useState<Record<string, boolean>>({});
+  const [imageLoadingMap, setImageLoadingMap] = useState<
+    Record<string, boolean>
+  >({});
   const handleImageLoadStart = (id: string) => {
-    setImageLoadingMap(prev => ({ ...prev, [id]: true }));
+    setImageLoadingMap(prev => ({...prev, [id]: true}));
   };
 
   const handleImageLoadEnd = (id: string) => {
-    setImageLoadingMap(prev => ({ ...prev, [id]: false }));
+    setImageLoadingMap(prev => ({...prev, [id]: false}));
   };
 
-
-
- const renderItem = ({ item }: { item: slidersType }) => {
+  const renderItem = ({item}: {item: slidersType}) => {
     const isLoading = imageLoadingMap[item.id];
 
     return (
       <View style={styles.carouselItem}>
         <Image
-          source={{ uri: `${IMG_API}${item.sliderId}` }}
+          source={{uri: `${IMG_API}${item.sliderId}`}}
           resizeMode="cover"
           style={styles.carouselImage}
           onLoadStart={() => handleImageLoadStart(item.id)}
@@ -107,11 +108,10 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
     );
   };
 
-
-
-
   const isPrimary = user?.relatedClass
-    ? ['Play', 'Nursery', 'One', 'Two', 'Three', 'Four', 'Five'].includes(user.relatedClass)
+    ? ['Play', 'Nursery', 'One', 'Two', 'Three', 'Four', 'Five'].includes(
+        user.relatedClass,
+      )
     : false;
 
   const isHigh = user?.relatedClass
@@ -136,28 +136,34 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
     getSliders();
   }, []);
 
-//UserManagement
+  //UserManagement
   const menuBlocks: MenuBlockType[] = user?.isApproved
     ? [
-        {id:1, title: 'আমার শিক্ষার্থী', data: studentManagement },
-      ...(user.role == 'admin' ? [{id:2, title: 'ব্যবহারকারী নিয়ন্ত্রণ', data: UserManagement }] : []),
-      ...(user.role !== 'admin' ? [{id:3, title: 'নতুন শিক্ষার্থী', data: newStuDataManagement }]:[]),
-      ...((isPrimary || user.role == 'admin') ? [{id:4, title: 'ডাউনলোড', data:  resultManagementPrimary}] : []),
-      ...((isHigh || user.role == 'admin') ? [{id:5, title: 'ফলাফল', data: resultManagementHigh }] : []),
+        {id: 1, title: 'ম্যানেজমেন্ট সেকশন', data: studentManagement},
+        ...(user.role == 'admin'
+          ? [{id: 2, title: 'নতুন তথ্য সেকশন', data: UserManagement}]
+          : []),
+        ...(user.role == 'editor'
+          ? [{id: 3, title: 'নতুন শিক্ষার্থী', data: UserManagement}]
+          : []),
+        ...(isPrimary || user.role == 'admin'
+          ? [{id: 4, title: 'প্রাইমারি সেকশন', data: resultManagementPrimary}]
+          : []),
+        ...(isHigh || user.role == 'admin'
+          ? [{id: 5, title: 'মাধ্যমিক সেকশন', data: resultManagementHigh}]
+          : []),
       ]
     : [];
 
-
- 
   return (
     <View style={styles.container}>
       <StatusBar
         backgroundColor={theme.colors.statusBarColor}
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
-      
+
       <UserHomeHeader navigation={navigation} route={route} />
-                        
+
       <View style={styles.carouselContainer}>
         <Carousel
           autoPlay
@@ -168,8 +174,8 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
           snapEnabled
           width={width}
           height={200}
-          style={{ width }}
-          mode='parallax'
+          style={{width}}
+          mode="parallax"
           modeConfig={{
             parallaxScrollingScale: 0.9,
             parallaxScrollingOffset: 50,
@@ -179,26 +185,27 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation, route }) =>
       </View>
 
       <FlatList
-       data={menuBlocks}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }: { item: MenuBlockType }) => (
+        data={menuBlocks}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({item}: {item: MenuBlockType}) => (
           <MenuList
             menuTitle={item.title}
             menuData={item.data}
             navigation={navigation}
             route={route}
           />
-
         )}
         ListFooterComponent={
           !user?.isApproved ? (
-            <View style={{justifyContent:'center', alignItems:'center'}}>
-              <Text className='text-gray-500 font-HindSemiBold text-base text-justify px-10 py-10'>আপনার একাউন্টটি এপ্রোভ করার জন্য কর্তৃপক্ষের সাথে যোগাযোগ করুন!</Text>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+              <Text className="text-gray-500 font-HindSemiBold text-base text-justify px-10 py-10">
+                আপনার একাউন্টটি এপ্রোভ করার জন্য কর্তৃপক্ষের সাথে যোগাযোগ করুন!
+              </Text>
             </View>
           ) : null
         }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{paddingBottom: 30}}
       />
     </View>
   );
@@ -233,7 +240,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor:'rgba(0, 0, 0, 0.8)',
-    zIndex:100
-  }
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    zIndex: 100,
+  },
 });
