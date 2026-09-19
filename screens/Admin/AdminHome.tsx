@@ -9,6 +9,7 @@ import {UserfromServerType} from '../../lib/zodschemas/zodSchemas';
 import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import {DataTable} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Loading from '../../comps/activityLoder/Loading';
 
 interface AdminHomeProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -27,6 +28,7 @@ const approveUser = async (userId: string, isApprove: boolean) => {
 };
 
 const AdminHome: React.FC<AdminHomeProps> = (props: AdminHomeProps) => {
+  const {user} = useAuthContexts();
   const {navigation, route} = props;
   const {loader, setLoader} = useAppContexts();
   const [netStatus, setNetStatus] = useState(false);
@@ -34,9 +36,11 @@ const AdminHome: React.FC<AdminHomeProps> = (props: AdminHomeProps) => {
 
   const getData = async () => {
     setLoader(true);
+    //console.log(user?.branch);
     try {
       const snapshot = await firestore()
         .collection('users')
+        .where('branch', '==', user?.branch)
         .orderBy('nameBang', 'asc')
         .get();
 
@@ -97,7 +101,7 @@ const AdminHome: React.FC<AdminHomeProps> = (props: AdminHomeProps) => {
             justifyContent: 'center',
             zIndex: 1000,
           }}>
-          <LoaderAnimation />
+          <Loading />
         </View>
       )}
 
@@ -184,41 +188,52 @@ const UserTable = ({
         </View>
       </View>
 
-      <DataTable.Header>
-        <DataTable.Title style={{flex: 0.5}}>ক্রম</DataTable.Title>
-        <DataTable.Title style={{flex: 4}}>ইউজারের নাম </DataTable.Title>
-        <DataTable.Title style={{flex: 1}}>ভূমিকা</DataTable.Title>
-        <DataTable.Title style={{flex: 1}}>একশন</DataTable.Title>
+      <DataTable.Header
+        style={{backgroundColor: '#60c4d6', margin: 5, borderRadius: 15}}>
+        <DataTable.Title style={{flex: 1}}>
+          <Text selectable className="text-sm text-black font-HindSemiBold">
+            {'ক্রমিক নং'}
+          </Text>
+        </DataTable.Title>
+        <DataTable.Title style={{flex: 4}}>
+          <Text selectable className="text-sm text-black font-HindSemiBold">
+            {' ইউজারের নাম '}
+          </Text>
+        </DataTable.Title>
+        <DataTable.Title style={{flex: 0.5}}>{''}</DataTable.Title>
       </DataTable.Header>
 
       {data.slice(from, to).map((item, index) => (
         <DataTable.Row
-          style={{backgroundColor: index % 2 === 0 ? '#FFF' : '#eee'}}
+          style={{
+            backgroundColor: index % 2 === 0 ? '#FFF' : '#dfdada',
+            margin: 3,
+            borderRadius: 15,
+          }}
           key={item.uid}>
-          <DataTable.Cell style={{flex: 0.5}}>{index + 1}</DataTable.Cell>
+          <DataTable.Cell
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            {index + 1}
+          </DataTable.Cell>
           <DataTable.Cell style={{flex: 4}}>
             <View>
-              <Text className="text-sm text-black font-HindSemiBold">
-                {item.nameBang}
+              <Text selectable className="text-sm text-black font-HindSemiBold">
+                {item.nameBang + '    ' + item.contact}
               </Text>
-              <Text className="text-xs text-gray-400 font-HindSemiBold">
-                {item.email} {' ' + item.password}
+              <Text
+                selectable
+                className="text-xs text-gray-400 font-HindSemiBold">
+                {item.uid.slice(0, 3) +
+                  '   ' +
+                  item.email +
+                  ' ' +
+                  item.password}
               </Text>
             </View>
           </DataTable.Cell>
-          <DataTable.Cell style={{flex: 1}}>
-            {
-              <TouchableOpacity>
-                <Icon
-                  name="delete"
-                  size={24}
-                  color="red"
-                  style={{width: '100%', textAlign: 'center'}}
-                />
-              </TouchableOpacity>
-            }
-          </DataTable.Cell>
-          <DataTable.Cell style={{flex: 1}}>
+
+          <DataTable.Cell
+            style={{flex: 0.5, justifyContent: 'center', alignItems: 'center'}}>
             {item.isApproved ? (
               <TouchableOpacity onPress={() => approveUser(item.uid, false)}>
                 <Icon

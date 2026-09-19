@@ -1,142 +1,209 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Text, ActivityIndicator} from 'react-native';
-import { Card, Button, useTheme, HelperText } from 'react-native-paper';
-import { Control, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ParentsAndContactInfoSchemama, ParentsAndContactInfoType } from '../../lib/zodschemas/zodSchemas';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
+
+import firestore from '@react-native-firebase/firestore';
+import {Card, Button, useTheme, HelperText} from 'react-native-paper';
+import {Control, useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {
+  ParentsAndContactInfoSchemama,
+  ParentsAndContactInfoType,
+} from '../../lib/zodschemas/zodSchemas';
 import CustomPicker from '../../comps/pickers/CustomPicker';
 import ControlledInput from '../../comps/Inputs/ControlledInput';
-import { useAdmissionContexts } from '../../contexts/AdmissionContext';
-import { getDataFromSheet } from '../../lib/helpers/helpers';
-import { INFO_API_URL } from '../../apis/config';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
+import {useAdmissionContexts} from '../../contexts/AdmissionContext';
+import {useAuthContexts} from '../../contexts/AuthContext';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteProp} from '@react-navigation/native';
 type ParentsAndContactProps = {
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
-}
+};
 type address = {
-  id: number,
-  label: string,
-  value: string
-}
-const ParentsAndContact:React.FC<ParentsAndContactProps> = ({ navigation, route }) => {
-  const {loader, setLoader, parentsAndContactInfo, setParentsAndContactInfo} = useAdmissionContexts();
-  const [address, setAddress] = useState<address[]>([]);
-  const { control, handleSubmit, formState: { errors } } = useForm<ParentsAndContactInfoType>({
+  id: number;
+  sef_branch: string;
+  label: string;
+  value: string;
+};
+
+type AddressType = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+const ParentsAndContact: React.FC<ParentsAndContactProps> = ({
+  navigation,
+  route,
+}) => {
+  const {user} = useAuthContexts();
+  const {loader, setLoader, parentsAndContactInfo, setParentsAndContactInfo} =
+    useAdmissionContexts();
+  const [address, setAddress] = useState<AddressType[]>([]);
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm<ParentsAndContactInfoType>({
     resolver: zodResolver(ParentsAndContactInfoSchemama),
     defaultValues: parentsAndContactInfo || {
       father_name: '',
       mother_name: '',
       contact_2: '',
       address: '',
-      village: ''
-    }
+      village: '',
+    },
   });
   const prev = () => {
     navigation.navigate('AdmissionHome');
   };
   const next = (data: ParentsAndContactInfoType) => {
-    setLoader(true)
+    setLoader(true);
     setParentsAndContactInfo(data);
     navigation.navigate('CheckAllDataAndSubmit'); // Replace with the actual next screen's name
-    
   };
 
-  const fetchData = async (sheetName: string, setData: (data: any) => void) => {
-    const data = await getDataFromSheet(`${INFO_API_URL}?sheetName=${sheetName}&action=read&route=info`);
-    setData(data ? data : [
-      {id:1,label:'দোলভিটী',value:'দোলভিটী'},
-      {id:2,label:'তারাকান্দি',value:'তারাকান্দি'},
-      {id:3,label:'পাখীমারা',value:'পাখীমারা'},
-      {id:4,label:'চরপাড়া',value:'চরপাড়া'}
-    ]);
+  const fetchAddress = async (): Promise<AddressType[]> => {
+    try {
+      if (!user?.branch) {
+        return [];
+      }
+
+      const snapshot = await firestore()
+        .collection('address')
+        .where('sef_branch', '==', user.branch)
+        .orderBy('label', 'asc')
+        .get();
+
+      const addressData: AddressType[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+
+        return {
+          id: doc.id,
+          label: data.label,
+          value: data.value,
+        };
+      });
+
+      setAddress(addressData);
+      return addressData; // Return false to indicate that the data has been fetched successfully
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      return [];
+    }
   };
 
   useEffect(() => {
-    setLoader(false)
-    fetchData('address', setAddress);
+    setLoader(false);
+    fetchAddress();
+    //fetchData('address', setAddress);
   }, []);
   return (
-    <View style={{flex: 1, justifyContent:'center', alignItems:'center', alignContent:'center', backgroundColor:"#FFF"}}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignContent: 'center',
+        backgroundColor: '#FFF',
+      }}>
       {loader && (
         <View style={styles.loaderOverlay}>
           <ActivityIndicator size="large" color="#FFF" />
         </View>
       )}
-      
-      
-      <View style={{ width:'80%'}}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{paddingVertical:10}}
-          >
-            <Text className='text-lg text-black font-HindSemiBold text-center'>পিতামাতা সম্পর্কিত তথ্য</Text>
 
-            <ControlledInput 
-              control={control}
-              name={"father_name"}
-              placeholder={""}
-              label={"পিতার নাম"}
-              style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
-            />          
+      <View style={{width: '80%'}}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingVertical: 10}}>
+          <Text className="text-lg text-black font-HindSemiBold text-center">
+            পিতামাতা সম্পর্কিত তথ্য
+          </Text>
 
-            <ControlledInput 
-              control={control}
-              name={"mother_name"}
-              placeholder={""}
-              label={"মাতার নাম"}
-              style={{fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
-            />
+          <ControlledInput
+            control={control}
+            name={'father_name'}
+            placeholder={''}
+            label={'পিতার নাম'}
+            style={{
+              fontFamily: 'HindSiliguri-SemiBold',
+              backgroundColor: '#FFF',
+            }}
+          />
 
-            <ControlledInput 
-              control={control}
-              name={"contact_2"}
-              placeholder={""}
-              label={"মাতার মোবাইল নাম্বার"}
-              keyboardType='numeric'
-                style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
-            />
-            <ControlledInput 
-              control={control}
-              name={"address"}
-              placeholder={""}
-              label={"বিস্তারিত ঠিকানা"}
-              multiline={true}
-              style={{ fontFamily: 'HindSiliguri-SemiBold', backgroundColor:"#FFF"}}
-            />
-            <CustomPicker 
-              control={control}
-              data={[...address.map((item: any) => ({
+          <ControlledInput
+            control={control}
+            name={'mother_name'}
+            placeholder={''}
+            label={'মাতার নাম'}
+            style={{
+              fontFamily: 'HindSiliguri-SemiBold',
+              backgroundColor: '#FFF',
+            }}
+          />
+
+          <ControlledInput
+            control={control}
+            name={'contact_2'}
+            placeholder={''}
+            label={'মাতার মোবাইল নাম্বার'}
+            keyboardType="numeric"
+            style={{
+              fontFamily: 'HindSiliguri-SemiBold',
+              backgroundColor: '#FFF',
+            }}
+          />
+          <ControlledInput
+            control={control}
+            name={'address'}
+            placeholder={''}
+            label={'বিস্তারিত ঠিকানা'}
+            multiline={true}
+            style={{
+              fontFamily: 'HindSiliguri-SemiBold',
+              backgroundColor: '#FFF',
+            }}
+          />
+          <CustomPicker
+            control={control}
+            data={[
+              ...address.map((item: any) => ({
                 id: item.id,
-                label: item.label,       // Assuming section items have an `id` field
-                value: item.value.toString(), // Assuming section items have a `value` field
-              }))]}
-              name={'village'}
-              pickerTitle={'গ্রাম / এলাকা / মহল্লা'}
-            />
-
-
+                label: item.label,
+                value: item.value,
+              })),
+            ]}
+            name={'village'}
+            pickerTitle={'গ্রাম / এলাকা / মহল্লা'}
+          />
 
           <View style={styles.buttonContainer}>
-            <Button style={styles.button} onPress={prev} mode={"contained"}>
+            <Button style={styles.button} onPress={prev} mode={'contained'}>
               ফিরুন
             </Button>
-            <Button style={styles.button} onPress={handleSubmit(next)} mode={"contained"}>
+            <Button
+              style={styles.button}
+              onPress={handleSubmit(next)}
+              mode={'contained'}>
               পরবর্তী
             </Button>
           </View>
-
-      </ScrollView>
+        </ScrollView>
       </View>
-  </View>
+    </View>
   );
 };
 
 export default ParentsAndContact;
 
 const styles = StyleSheet.create({
-
   cardContent: {
     gap: 5,
   },
@@ -144,7 +211,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 5,
     justifyContent: 'space-between',
-    marginTop:20
+    marginTop: 20,
   },
   button: {
     flex: 1,
@@ -158,7 +225,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor:'rgba(0, 0, 0, 0.5)',
-    zIndex:100
-  }
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 100,
+  },
 });

@@ -2,9 +2,17 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useAuthContexts } from '../../contexts/AuthContext';
+import {
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
+import {RouteProp} from '@react-navigation/native';
 
+type LogoutButtonProps = {
+  navigation: NativeStackNavigationProp<any>;
+  route: RouteProp<any>;
+};
 
-const LogoutButton = () => {
+const LogoutButton = ({navigation, route}: LogoutButtonProps) => {
   const {logout } = useAuthContexts();
     
   const handleLogout = async () => {

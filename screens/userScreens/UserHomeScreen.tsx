@@ -36,11 +36,9 @@ export interface MenuBlockType {
 
 import {
   newStuDataManagement,
-  resultManagementHigh,
-  resultManagementPrimary,
-  studentManagement,
-  UserManagement,
+  managementMenuData,
 } from '../../lib/jsonValue/MenuData';
+import Loading from '../../comps/activityLoder/Loading';
 
 interface slidersType {
   id: string;
@@ -101,22 +99,12 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({navigation, route}) => {
         />
         {isLoading && (
           <View style={styles.loaderOverlay}>
-            <ActivityIndicator size="large" color="#fff" />
+            <Loading />
           </View>
         )}
       </View>
     );
   };
-
-  const isPrimary = user?.relatedClass
-    ? ['Play', 'Nursery', 'One', 'Two', 'Three', 'Four', 'Five'].includes(
-        user.relatedClass,
-      )
-    : false;
-
-  const isHigh = user?.relatedClass
-    ? ['Six', 'Seven', 'Eight', 'Nine', 'Ten'].includes(user.relatedClass)
-    : false;
 
   const getSliders = async () => {
     setLoader(true);
@@ -139,19 +127,30 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({navigation, route}) => {
   //UserManagement
   const menuBlocks: MenuBlockType[] = user?.isApproved
     ? [
-        {id: 1, title: 'ম্যানেজমেন্ট সেকশন', data: studentManagement},
-        ...(user.role == 'admin'
-          ? [{id: 2, title: 'নতুন তথ্য সেকশন', data: UserManagement}]
-          : []),
-        ...(user.role == 'editor'
-          ? [{id: 3, title: 'নতুন শিক্ষার্থী', data: UserManagement}]
-          : []),
-        ...(isPrimary || user.role == 'admin'
-          ? [{id: 4, title: 'প্রাইমারি সেকশন', data: resultManagementPrimary}]
-          : []),
-        ...(isHigh || user.role == 'admin'
-          ? [{id: 5, title: 'মাধ্যমিক সেকশন', data: resultManagementHigh}]
-          : []),
+        {
+          id: 1,
+          title: 'ম্যানেজমেন্ট সেকশন',
+          data: managementMenuData.filter(
+            item => !item.adminOnly || user?.role === 'admin',
+          ),
+        },
+
+        {
+          id: 2,
+          title: 'নতুন শিক্ষার্থী',
+          data: newStuDataManagement
+            .filter(item => !item.adminOnly || user?.role === 'admin')
+            .map(item => {
+              if (item.menuTitle === 'সংগ্রহশালা' && user?.role !== 'admin') {
+                return {
+                  ...item,
+                  route: 'NewStuInfoByTeacher',
+                };
+              }
+
+              return item;
+            }),
+        },
       ]
     : [];
 

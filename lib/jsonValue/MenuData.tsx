@@ -1,10 +1,11 @@
-export const studentManagement = [
+export const managementMenuData = [
   {
     id: 1,
     menuTitle: 'ব্যবহারকারী',
     icon: 'infocirlceo',
     route: 'AdminHomeRoute',
     routeStatus: true,
+    adminOnly: true,
   },
   {
     id: 2,
@@ -12,47 +13,33 @@ export const studentManagement = [
     icon: 'user',
     route: 'MyStudentsRoute',
     routeStatus: true,
-  },
-];
-export const resultManagementPrimary = [
-  {
-    id: 1,
-    menuTitle: 'ফলাফল',
-    icon: 'contacts',
-    route: 'GetResultPrimary',
-    routeStatus: true,
-  },
-];
-export const resultManagementHigh = [
-  {
-    id: 1,
-    menuTitle: 'ফলাফল',
-    icon: 'contacts',
-    route: 'ResultDownloadScreenHigh',
-    routeStatus: true,
+    adminOnly: false,
   },
 ];
 
-export const UserManagement = [
+export const newStuDataManagement = [
   {
-    id: 2,
+    id: 1,
     menuTitle: 'এড নিউ',
     icon: 'addusergroup',
     route: 'AddmissionNavigator',
     routeStatus: true,
+    adminOnly: false,
   },
   {
-    id: 3,
+    id: 2,
     menuTitle: 'সংগ্রহশালা',
     icon: 'infocirlceo',
     route: 'NewInfoNavigator',
     routeStatus: true,
+    adminOnly: false,
   },
   {
-    id: 4,
+    id: 3,
     menuTitle: 'পরিসংখ্যান',
     icon: 'barschart',
     route: 'StatisticsScreen',
     routeStatus: true,
+    adminOnly: true,
   },
 ];

@@ -1,58 +1,82 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import MainAppStack from '../routes/MainAppHome/MainAppStack';
 import AuthenticationRoute from './Authentication/AuthenticationRoute';
-import auth, {User} from '@react-native-firebase/auth';
-import firestore, {DocumentSnapshot} from '@react-native-firebase/firestore';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import {useAuthContexts} from '../contexts/AuthContext';
-
-// Define the type for user data from Firestore
-interface UserData {
-  branch: string;
-  contact: number;
-  email: string;
-  id: string;
-  imageId: string;
-  role: string;
-  teaClass: string;
-  userName: string;
-}
+import AppLauncher from '../comps/activityLoder/AppLauncher';
+import {View} from 'react-native';
 
 const Main: React.FC = () => {
   const [initializing, setInitializing] = useState(true);
   const {user, setUser} = useAuthContexts();
 
-  // Handle user state changes
-  const stateChanged = async (currentUser: User | null) => {
-    if (currentUser) {
-      // Fetch user data from Firestore
-      const userDoc: DocumentSnapshot<UserData> = await firestore()
-        .collection('users')
-        .doc(currentUser.uid)
-        .get();
+  const stateChanged = async (currentUser: FirebaseAuthTypes.User | null) => {
+    try {
+      // User is logged in
+      if (currentUser) {
+        const userDoc = await firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
 
-      if (userDoc.exists) {
-        setUser(userDoc.data() as UserData); // Cast to UserData type
+        if (userDoc.exists) {
+          const data = userDoc.data();
+
+          if (data) {
+            const userData = {
+              uid: currentUser.uid,
+              nameBang: data.nameBang ?? '',
+              nameEng: data.nameEng ?? '',
+              contact: String(data.contact ?? ''),
+              title: data.title ?? '',
+              role: data.role ?? '',
+              branch: data.branch ?? '',
+              isApproved: data.isApproved ?? false,
+              imageId: data.imageId ?? '',
+              relatedClass: data.relatedClass ?? '',
+              email: data.email ?? currentUser.email ?? '',
+              password: String(data.password ?? ''),
+            };
+
+            setUser(userData);
+          } else {
+            setUser(null);
+          }
+        } else {
+          // Firebase Auth user exists,
+          // but Firestore user document doesn't exist.
+          setUser(null);
+        }
       } else {
-        setUser(null); // Handle case where user document doesn't exist
+        // User is logged out
+        setUser(null);
       }
-    } else {
-      setUser(null); // User is signed out
+    } catch (error) {
+      console.log('Error loading user data:', error);
+      setUser(null);
+    } finally {
+      setInitializing(false);
     }
-
-    if (initializing) setInitializing(false); // Set initializing to false after user state is determined
   };
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(stateChanged);
-    return () => subscriber(); // Unsubscribe on unmount
+
+    return subscriber;
   }, []);
 
   if (initializing) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" color="#0B2447" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+        }}>
+        <AppLauncher />
       </View>
     );
   }

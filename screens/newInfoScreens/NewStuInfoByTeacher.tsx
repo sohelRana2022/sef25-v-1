@@ -60,8 +60,9 @@ const NewStuInfoByTeacher = (props: NewStuInfoByTeacherProps) => {
         .collection('newinfos')
         .where('ref_uid', '==', route.params.ref_uid)
         .where('send_date', '>=', startOfYear)
+        .orderBy('send_date', 'asc')
         .get();
-
+      console.log(route.params.ref_uid);
       const newStuData = snapshot.docs.map(doc => {
         const data = doc.data();
         const send_date = data?.send_date.toDate();

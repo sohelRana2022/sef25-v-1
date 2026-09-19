@@ -9,15 +9,16 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/AntDesign';
+import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import {useAppContexts} from '../../contexts/AppContext';
 import {Button, DataTable} from 'react-native-paper';
 import {useAuthContexts} from '../../contexts/AuthContext';
-import LoaderAnimation from '../../comps/activityLoder/LoaderAnimation';
 import firestore from '@react-native-firebase/firestore';
 import {addInfoSchema, addInfoType} from '../../lib/zodschemas/zodSchemas';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -25,6 +26,8 @@ import {useForm} from 'react-hook-form';
 import RadioButtons from '../../comps/Inputs/RadioButton';
 import {addPointData} from '../../lib/jsonValue/PickerData';
 import ControlledInput from '../../comps/Inputs/ControlledInput';
+import Loading from '../../comps/activityLoder/Loading';
+import ThreeDots from '../../comps/Menu/ThreeDots';
 
 interface NewStuInfoScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -90,25 +93,86 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
     }));
   }, [watchedTotal, watchedPoint, reset]);
 
+  // const getData = async () => {
+  //   setLoader(true);
+  //   try {
+  //     const currentYear = new Date().getFullYear(); // 2025
+  //     const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+  //     //const now = new Date();
+  //     if (!user?.branch) return;
+  //     const snapshot = await firestore()
+  //       .collection('newinfos')
+  //       .where('sef_branch', '==', user.branch)
+  //       .where('send_date', '>=', startOfYear)
+  //       .orderBy('send_date', 'desc')
+  //       .get();
+
+  //     const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
+  //       const data = doc.data();
+  //       const timestamp = data.send_date; // Firestore Timestamp
+  //       const jsDate = timestamp.toDate(); // JavaScript Date object
+
+  //       return {
+  //         ref_uid: data.ref_uid,
+  //         uid: doc.id,
+  //         stu_name_bn: data.stu_name_bn,
+  //         stu_name_eng: data.stu_name_eng,
+  //         stu_class: data.stu_class,
+  //         stu_gender: data.stu_gender,
+  //         stu_religion: data.stu_religion,
+  //         prev_school: data.prev_school,
+  //         posibility: data.posibility,
+  //         father_name: data.father_name,
+  //         mother_name: data.mother_name,
+  //         contact_1: data.contact_1,
+  //         contact_2: data.contact_2,
+  //         address: data.address,
+  //         village: data.village,
+  //         ref_person: data.ref_person,
+  //         sef_branch: data.sef_branch,
+  //         is_admitted: data.is_admitted,
+  //         send_date: jsDate,
+  //         add_point: data.add_point,
+  //         is_active: data.is_active,
+  //         valid_days: data.valid_days,
+  //       };
+  //     });
+
+  //     setData(newStuData);
+  //     setLoader(false);
+  //   } catch (err) {
+  //     setNetStatus(true);
+  //   } finally {
+  //     setLoader(false);
+  //     setNetStatus(false);
+  //   }
+  // };
+
   const getData = async () => {
     setLoader(true);
-    try {
-      const currentYear = new Date().getFullYear(); // 2025
 
+    try {
+      const currentYear = new Date().getFullYear();
       const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-      //const now = new Date();
+
       if (!user?.branch) return;
-      const snapshot = await firestore()
+
+      let query = firestore()
         .collection('newinfos')
         .where('sef_branch', '==', user.branch)
-        .where('send_date', '>=', startOfYear)
-        .orderBy('send_date', 'desc')
-        .get();
+        .where('send_date', '>=', startOfYear);
+
+      // Editor হলে শুধু নিজের ref_uid-এর data
+      if (user.role === 'editor') {
+        query = query.where('ref_uid', '==', user.uid);
+      }
+
+      const snapshot = await query.orderBy('send_date', 'desc').get();
 
       const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        const timestamp = data.send_date; // Firestore Timestamp
-        const jsDate = timestamp.toDate(); // JavaScript Date object
+        const timestamp = data.send_date;
+        const jsDate = timestamp.toDate();
 
         return {
           ref_uid: data.ref_uid,
@@ -137,12 +201,11 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
       });
 
       setData(newStuData);
-      setLoader(false);
     } catch (err) {
+      console.log('getData error:', err);
       setNetStatus(true);
     } finally {
       setLoader(false);
-      setNetStatus(false);
     }
   };
 
@@ -178,6 +241,29 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
     }
   };
 
+  const handleDelete = async (uid: string) => {
+    setLoader(true);
+    try {
+      await firestore().collection('newinfos').doc(uid).delete();
+      // Remove the deleted item from the local state
+      setData(prevData => prevData.filter(item => item.uid !== uid));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const handleCall = async (phone: string) => {
+    const url = `tel:${phone}`;
+
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.log('Unable to open dialer:', error);
+    }
+  };
+
   return (
     <>
       {/* Search Area */}
@@ -194,7 +280,7 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
             underlineColorAndroid="transparent"
             selectionColor="rgba(0, 0, 0, 0.5)"
             style={{
-              fontFamily: 'HindSiliguri-SemiBold',
+              fontFamily: 'HindSiliguri-Regular',
               fontSize: 15,
               color: '#000',
             }}
@@ -218,7 +304,7 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
             justifyContent: 'center',
             zIndex: 1000,
           }}>
-          <LoaderAnimation />
+          <Loading />
         </View>
       )}
 
@@ -246,6 +332,8 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
           route={route}
           setModalVisible={setModalVisible}
           setDocuid={setDocuid}
+          handleDelete={handleDelete}
+          handleCall={handleCall}
         />
       )}
 
@@ -339,12 +427,16 @@ const NewInfoTable = ({
   route,
   setModalVisible,
   setDocuid,
+  handleDelete,
+  handleCall,
 }: {
   data: StudentInfo[];
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
   setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setDocuid: React.Dispatch<React.SetStateAction<string>>;
+  handleDelete: (uid: string) => Promise<void>;
+  handleCall: (phone: string) => Promise<void>;
 }) => {
   const {user} = useAuthContexts();
   const [page, setPage] = React.useState<number>(0);
@@ -376,7 +468,10 @@ const NewInfoTable = ({
 
       {data.slice(from, to).map((item, index) => (
         <DataTable.Row
-          style={{backgroundColor: index % 2 === 0 ? '#FFF' : '#eee'}}
+          style={{
+            backgroundColor: index % 2 === 0 ? '#FFF' : '#eee',
+            height: 60,
+          }}
           key={item.uid}>
           <DataTable.Cell style={{flex: 1}}>
             <View className="justify-center items-center flex-row">
@@ -388,10 +483,10 @@ const NewInfoTable = ({
           <DataTable.Cell style={{flex: 5}}>
             <View className="justify-center items-center flex-row">
               <View className="flex-col">
-                <Text className="text-sm text-black font-HindSemiBold">
+                <Text className="text-sm text-black font-HindSemiBold leading-5">
                   {item.stu_name_bn}
                 </Text>
-                <Text className="text-xs text-gray-400 font-HindSemiBold">
+                <Text className="text-xs text-gray-400 font-HindSemiBold leading-5">
                   {item.ref_person +
                     ' | ' +
                     item.village +
@@ -401,49 +496,62 @@ const NewInfoTable = ({
               </View>
             </View>
           </DataTable.Cell>
+
           <DataTable.Cell
-            textStyle={{
-              textAlign: 'center',
-              color: '#ddd',
-              alignSelf: 'center',
-            }}
-            style={{flex: 1, justifyContent: 'center'}}
-            onPress={() =>
-              user && (item.ref_uid === user.uid || user.role === 'admin')
-                ? navigation.navigate('NewInfoNavigator', {
-                    screen: 'NewStudentDataDetailScreen',
-                    params: {
+            style={{flex: 1, height: '100%', justifyContent: 'center'}}>
+            <ThreeDots
+              items={[
+                {
+                  id: 'call',
+                  title: 'কল করুন',
+                  icon: 'phone-outline',
+                },
+                {
+                  id: 'view',
+                  title: 'বিস্তারিত দেখুন',
+                  icon: 'eye-outline',
+                },
+                {
+                  id: 'admission',
+                  title: 'ভর্তি করুন',
+                  icon: 'plus-circle-outline',
+                },
+                {
+                  id: 'delete',
+                  title: 'মুছে ফেলুন',
+                  icon: 'delete-outline',
+                  destructive: true,
+                },
+              ]}
+              onSelect={action => {
+                switch (action.id) {
+                  case 'call':
+                    handleCall(item.contact_1);
+                    break;
+
+                  case 'view':
+                    navigation.navigate('NewStudentDataDetailScreen', {
                       stu_data: {
                         ...item,
-                        send_date: new Date(item.send_date).toISOString(),
+                        send_date: item.send_date?.toISOString(),
                       },
-                    },
-                  })
-                : null
-            }>
-            {
-              <Icon
-                name="eye"
-                size={25}
-                color="black"
-                style={{textAlign: 'center'}}
-              />
-            }
-          </DataTable.Cell>
-          <DataTable.Cell
-            style={{flex: 1}}
-            onPress={() => {
-              setDocuid(item.uid);
-              user && user.role === 'admin' ? setModalVisible(true) : null;
-            }}>
-            {
-              <Icon
-                name="addfile"
-                size={24}
-                color={item.is_admitted ? 'green' : 'red'}
-                style={{width: '100%', textAlign: 'center'}}
-              />
-            }
+                    });
+
+                  case 'admission':
+                    if (user?.role === 'admin') {
+                      setDocuid(item.uid);
+                      setModalVisible(true);
+                    }
+                    break;
+
+                  case 'delete':
+                    if (user?.role === 'admin') {
+                      handleDelete(item.uid);
+                    }
+                    break;
+                }
+              }}
+            />
           </DataTable.Cell>
         </DataTable.Row>
       ))}

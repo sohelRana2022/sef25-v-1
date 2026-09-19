@@ -16,6 +16,7 @@ import {useAuthContexts} from '../../contexts/AuthContext';
 import {useAppContexts} from '../../contexts/AppContext';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
+import Loading from '../../comps/activityLoder/Loading';
 interface LoginScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
@@ -62,7 +63,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       }}>
       {loader && (
         <View style={styles.loaderOverlay}>
-          <ActivityIndicator size="large" color="#FFF" />
+          <Loading />
           <Text className="text-base font-HindRegular text-[#FFF] pt-5">
             অপেক্ষা করুন .....!
           </Text>
