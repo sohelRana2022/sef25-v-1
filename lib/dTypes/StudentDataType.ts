@@ -19,7 +19,6 @@ export type studentDataType = {
     sef_branch: string,
     is_admitted : boolean,
     is_active: boolean,
-    valid_days: number,
     send_date: string,
     add_point: number,
     commission: number,
@@ -76,3 +75,29 @@ export type summary = {
       GkHighest: number,
     }
   }
+
+
+export interface StudentInfo {
+  ref_uid: string;
+  uid: string;
+  stu_name_bn: string;
+  stu_name_eng: string;
+  stu_class: string;
+  stu_gender: string;
+  stu_religion: string;
+  prev_school: string;
+  posibility: number;
+  father_name: string;
+  mother_name: string;
+  contact_1: string;
+  contact_2: string;
+  address: string;
+  village: string;
+  ref_person: string;
+  sef_branch: string;
+  add_point: number;
+  is_admitted: boolean;
+  send_date: Date;
+  is_active: boolean;
+  valid_days: number;
+}

@@ -15,6 +15,7 @@ import {
 import {RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {useAuthContexts} from '../../contexts/AuthContext';
+import PhoneTapping from '../../comps/animations/PhoneTapping';
 
 interface CheckDataProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -97,11 +98,7 @@ const CheckNewData: React.FC<CheckDataProps> = ({navigation}) => {
         </View>
       )}
 
-      <Icon name="warning" size={30} color="orange" />
-      <Text className="flex-start text-gray-500 text-xs font-HindSemiBold pt-5 w-[60%] text-justify">
-        শিক্ষার্থীর পিতার সচল ফোন নাম্বারটি এখানে লিখুন। এই ফোন নাম্বার ভুল হলে
-        তথ্যটি আপনার নয় বলে বিবেচিত হবে। এক্ষেত্রে, কোন অজুহাত গ্রহণ করা হবে না।{' '}
-      </Text>
+      <PhoneTapping />
       <View className="w-[80%] px-10">
         <ControlledInput
           control={control}

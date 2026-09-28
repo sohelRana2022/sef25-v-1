@@ -16,11 +16,9 @@ export const UserInfoSchema = z
       .regex(/^([A-Z][a-z]*)( [A-Z][a-z]*)*$/, {
         message: 'ইংরেজিতে লিখুন এবং প্রথমে ও শেষে স্পেস দিবেন না!',
       }),
-    contact: z
-      .string()
-      .regex(/(^(01){1}[3-9]{1}(\d){8})$/, {
-        message: 'মোবাইল নাম্বারটি সঠিক নয়!',
-      }),
+    contact: z.string().regex(/(^(01){1}[3-9]{1}(\d){8})$/, {
+      message: 'মোবাইল নাম্বারটি সঠিক নয়!',
+    }),
     role: z.string().min(1),
     title: z.string().min(1),
     relatedClass: z.string(),
@@ -405,7 +403,12 @@ export const addInfoSchema = z.object({
     return isNaN(num) ? undefined : num;
   }, z.number({required_error: 'অবদান সংখ্যা প্রয়োজন'}).min(0.25).max(1)),
 
-  commission: z.number(),
+  commission: z.preprocess(val => {
+    if (typeof val === 'string' && val.trim() === '') return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number({required_error: 'কমিশন প্রয়োজন'}).min(5, 'কমিশন অবশ্যই ৫ বা তার বেশি হতে হবে')),
+
   is_admitted: z.boolean(),
   add_date: z.date(),
 });

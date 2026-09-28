@@ -6,7 +6,6 @@ import {
   StatusBar,
   Image,
   FlatList,
-  ActivityIndicator,
   Text,
 } from 'react-native';
 import UserHomeHeader from '../../comps/headers/UserHomeHeader';
@@ -16,9 +15,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import {useAuthContexts} from '../../contexts/AuthContext';
 import Carousel from 'react-native-reanimated-carousel';
-import axios from 'axios';
-import {IMG_API, SLIDERS_API} from '../../apis/config';
-import {useAppContexts} from '../../contexts/AppContext';
+import {IMG_API} from '../../apis/config';
 
 export interface MenuItemType {
   id: number;
@@ -39,6 +36,8 @@ import {
   managementMenuData,
 } from '../../lib/jsonValue/MenuData';
 import Loading from '../../comps/activityLoder/Loading';
+import {getSliders} from '../../lib/crudFuncs/realtimeDbCrud';
+import Education from '../../comps/animations/Education';
 
 interface slidersType {
   id: string;
@@ -71,7 +70,6 @@ interface UserHomeScreenProps {
 const {width} = Dimensions.get('window');
 
 const UserHomeScreen: React.FC<UserHomeScreenProps> = ({navigation, route}) => {
-  const {loader, setLoader} = useAppContexts();
   const {user} = useAuthContexts();
   const [sliders, setSliders] = useState<slidersType[]>([]);
   const [imageLoadingMap, setImageLoadingMap] = useState<
@@ -106,34 +104,30 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({navigation, route}) => {
     );
   };
 
-  const getSliders = async () => {
-    setLoader(true);
-    try {
-      const res = await axios.get(`${SLIDERS_API}`);
-      if (res.data) {
-        setSliders(res.data.response);
-      }
-    } catch (err) {
-      // Handle error
-    } finally {
-      setLoader(false);
-    }
+  const getSlidersByBranch = async () => {
+    const branch = user?.branch || '';
+    const sliders = await getSliders(branch);
+    setSliders(sliders);
   };
 
   useEffect(() => {
-    getSliders();
+    getSlidersByBranch();
   }, []);
 
   //UserManagement
   const menuBlocks: MenuBlockType[] = user?.isApproved
     ? [
-        {
-          id: 1,
-          title: 'ম্যানেজমেন্ট সেকশন',
-          data: managementMenuData.filter(
-            item => !item.adminOnly || user?.role === 'admin',
-          ),
-        },
+        ...(user?.role === 'admin'
+          ? [
+              {
+                id: 1,
+                title: 'ম্যানেজমেন্ট সেকশন',
+                data: managementMenuData.filter(
+                  item => !item.adminOnly || user?.role === 'admin',
+                ),
+              },
+            ]
+          : []),
 
         {
           id: 2,

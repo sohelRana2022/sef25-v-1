@@ -7,17 +7,14 @@ import {
   Image,
   Modal,
   StyleSheet,
-  Dimensions,
-  ActivityIndicator,
   Linking,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/AntDesign';
-import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import {useAppContexts} from '../../contexts/AppContext';
-import {Button, DataTable} from 'react-native-paper';
+import {Button} from 'react-native-paper';
 import {useAuthContexts} from '../../contexts/AuthContext';
 import firestore from '@react-native-firebase/firestore';
 import {addInfoSchema, addInfoType} from '../../lib/zodschemas/zodSchemas';
@@ -27,36 +24,13 @@ import RadioButtons from '../../comps/Inputs/RadioButton';
 import {addPointData} from '../../lib/jsonValue/PickerData';
 import ControlledInput from '../../comps/Inputs/ControlledInput';
 import Loading from '../../comps/activityLoder/Loading';
-import ThreeDots from '../../comps/Menu/ThreeDots';
+import NewStuInfoTable from '../../comps/tables/NewStuInfoTable';
+import {searchNewStudents} from '../../lib/helpers/SearchNewStu';
+import {StudentInfo} from '../../lib/dTypes/StudentDataType';
 
 interface NewStuInfoScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
-}
-
-interface StudentInfo {
-  ref_uid: string;
-  uid: string;
-  stu_name_bn: string;
-  stu_name_eng: string;
-  stu_class: string;
-  stu_gender: string;
-  stu_religion: string;
-  prev_school: string;
-  posibility: number;
-  father_name: string;
-  mother_name: string;
-  contact_1: string;
-  contact_2: string;
-  address: string;
-  village: string;
-  ref_person: string;
-  sef_branch: string;
-  add_point: number;
-  is_admitted: boolean;
-  send_date: Date;
-  is_active: boolean;
-  valid_days: number;
 }
 
 const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
@@ -64,14 +38,22 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
   route,
 }) => {
   const {user} = useAuthContexts();
+  const {loader, setLoader} = useAppContexts();
+
   const [netStatus, setNetStatus] = useState(false);
+
+  // Admission modal
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Delete confirmation modal
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteUid, setDeleteUid] = useState('');
+
   const [searchText, setSearchText] = useState('');
   const [docuid, setDocuid] = useState('');
   const [data, setData] = useState<StudentInfo[]>([]);
-  const {loader, setLoader} = useAppContexts();
 
-  const {control, handleSubmit, reset, watch} = useForm<addInfoType>({
+  const {control, handleSubmit, reset} = useForm<addInfoType>({
     resolver: zodResolver(addInfoSchema),
     defaultValues: {
       total_add_fee: 0,
@@ -82,87 +64,77 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
     },
   });
 
-  const watchedTotal = watch('total_add_fee');
-  const watchedPoint = watch('add_point');
+  /* -------------------------------------------------------------------------- */
+  /* Reset Admission Modal                                                     */
+  /* -------------------------------------------------------------------------- */
 
-  useEffect(() => {
-    const newCommission = (watchedTotal || 0) * 0.1 * (watchedPoint || 0);
-    reset(prev => ({
-      ...prev,
-      commission: newCommission,
-    }));
-  }, [watchedTotal, watchedPoint, reset]);
+  const resetModalForm = () => {
+    reset({
+      total_add_fee: 0,
+      add_point: 0,
+      commission: 5,
+      is_admitted: true,
+      add_date: new Date(),
+    });
 
-  // const getData = async () => {
-  //   setLoader(true);
-  //   try {
-  //     const currentYear = new Date().getFullYear(); // 2025
-  //     const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-  //     //const now = new Date();
-  //     if (!user?.branch) return;
-  //     const snapshot = await firestore()
-  //       .collection('newinfos')
-  //       .where('sef_branch', '==', user.branch)
-  //       .where('send_date', '>=', startOfYear)
-  //       .orderBy('send_date', 'desc')
-  //       .get();
+    setDocuid('');
+  };
 
-  //     const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
-  //       const data = doc.data();
-  //       const timestamp = data.send_date; // Firestore Timestamp
-  //       const jsDate = timestamp.toDate(); // JavaScript Date object
+  /* -------------------------------------------------------------------------- */
+  /* Update Admission Information                                               */
+  /* -------------------------------------------------------------------------- */
 
-  //       return {
-  //         ref_uid: data.ref_uid,
-  //         uid: doc.id,
-  //         stu_name_bn: data.stu_name_bn,
-  //         stu_name_eng: data.stu_name_eng,
-  //         stu_class: data.stu_class,
-  //         stu_gender: data.stu_gender,
-  //         stu_religion: data.stu_religion,
-  //         prev_school: data.prev_school,
-  //         posibility: data.posibility,
-  //         father_name: data.father_name,
-  //         mother_name: data.mother_name,
-  //         contact_1: data.contact_1,
-  //         contact_2: data.contact_2,
-  //         address: data.address,
-  //         village: data.village,
-  //         ref_person: data.ref_person,
-  //         sef_branch: data.sef_branch,
-  //         is_admitted: data.is_admitted,
-  //         send_date: jsDate,
-  //         add_point: data.add_point,
-  //         is_active: data.is_active,
-  //         valid_days: data.valid_days,
-  //       };
-  //     });
+  const update = async (formData: addInfoType) => {
+    if (!docuid) return;
 
-  //     setData(newStuData);
-  //     setLoader(false);
-  //   } catch (err) {
-  //     setNetStatus(true);
-  //   } finally {
-  //     setLoader(false);
-  //     setNetStatus(false);
-  //   }
-  // };
-
-  const getData = async () => {
     setLoader(true);
 
     try {
-      const currentYear = new Date().getFullYear();
-      const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+      const commission =
+        (((formData.total_add_fee || 0) * (formData.commission || 0)) / 100) *
+        (formData.add_point || 0);
 
-      if (!user?.branch) return;
+      await firestore()
+        .collection('newinfos')
+        .doc(docuid)
+        .update({
+          ...formData,
+          commission,
+        });
+
+      setModalVisible(false);
+      resetModalForm();
+
+      // চাইলে update-এর পর data refresh হবে
+      await getData();
+    } catch (error) {
+      console.log('Update error:', error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /* Get Student Data                                                           */
+  /* -------------------------------------------------------------------------- */
+
+  const getData = async () => {
+    if (!user?.branch) return;
+
+    setLoader(true);
+    setNetStatus(false);
+
+    try {
+      const currentYear = new Date().getFullYear();
+
+      const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
 
       let query = firestore()
         .collection('newinfos')
         .where('sef_branch', '==', user.branch)
         .where('send_date', '>=', startOfYear);
 
-      // Editor হলে শুধু নিজের ref_uid-এর data
+      // Editor হলে শুধু নিজের data
       if (user.role === 'editor') {
         query = query.where('ref_uid', '==', user.uid);
       }
@@ -170,33 +142,34 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
       const snapshot = await query.orderBy('send_date', 'desc').get();
 
       const newStuData: StudentInfo[] = snapshot.docs.map(doc => {
-        const data = doc.data();
-        const timestamp = data.send_date;
+        const studentData = doc.data();
+
+        const timestamp = studentData.send_date;
         const jsDate = timestamp.toDate();
 
         return {
-          ref_uid: data.ref_uid,
+          ref_uid: studentData.ref_uid,
           uid: doc.id,
-          stu_name_bn: data.stu_name_bn,
-          stu_name_eng: data.stu_name_eng,
-          stu_class: data.stu_class,
-          stu_gender: data.stu_gender,
-          stu_religion: data.stu_religion,
-          prev_school: data.prev_school,
-          posibility: data.posibility,
-          father_name: data.father_name,
-          mother_name: data.mother_name,
-          contact_1: data.contact_1,
-          contact_2: data.contact_2,
-          address: data.address,
-          village: data.village,
-          ref_person: data.ref_person,
-          sef_branch: data.sef_branch,
-          is_admitted: data.is_admitted,
+          stu_name_bn: studentData.stu_name_bn,
+          stu_name_eng: studentData.stu_name_eng,
+          stu_class: studentData.stu_class,
+          stu_gender: studentData.stu_gender,
+          stu_religion: studentData.stu_religion,
+          prev_school: studentData.prev_school,
+          posibility: studentData.posibility,
+          father_name: studentData.father_name,
+          mother_name: studentData.mother_name,
+          contact_1: studentData.contact_1,
+          contact_2: studentData.contact_2,
+          address: studentData.address,
+          village: studentData.village,
+          ref_person: studentData.ref_person,
+          sef_branch: studentData.sef_branch,
+          is_admitted: studentData.is_admitted,
           send_date: jsDate,
-          add_point: data.add_point,
-          is_active: data.is_active,
-          valid_days: data.valid_days,
+          add_point: studentData.add_point,
+          is_active: studentData.is_active,
+          valid_days: studentData.valid_days,
         };
       });
 
@@ -209,50 +182,70 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /* Initial Data Fetch                                                         */
+  /* -------------------------------------------------------------------------- */
+
   useEffect(() => {
-    getData();
-  }, []);
+    if (user?.branch) {
+      getData();
+    }
+  }, [user?.branch]);
+
+  /* -------------------------------------------------------------------------- */
+  /* Search                                                                     */
+  /* -------------------------------------------------------------------------- */
 
   const filteredData = useMemo(() => {
-    if (!Array.isArray(data)) return [];
-    const searchWords = searchText.toLowerCase().trim().split(/\s+/);
-    return data.filter(r =>
-      searchWords.every(word =>
-        Object.values(r).join(' ').toLowerCase().includes(word),
-      ),
-    );
+    return searchNewStudents(data, searchText);
   }, [searchText, data]);
 
-  const update = async (data: addInfoType) => {
-    setLoader(true);
-    try {
-      await firestore()
-        .collection('newinfos')
-        .doc(docuid)
-        .update(data)
-        .then(() => {
-          setLoader(false);
-          setModalVisible(false);
-        });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoader(false);
-    }
+  /* -------------------------------------------------------------------------- */
+  /* Delete Button Press                                                        */
+  /* -------------------------------------------------------------------------- */
+
+  const handleDelete = (uid: string) => {
+    setDeleteUid(uid);
+    setDeleteConfirmVisible(true);
   };
 
-  const handleDelete = async (uid: string) => {
+  /* -------------------------------------------------------------------------- */
+  /* Confirm Delete                                                             */
+  /* -------------------------------------------------------------------------- */
+
+  const confirmDelete = async () => {
+    if (!deleteUid) return;
+
     setLoader(true);
+
     try {
-      await firestore().collection('newinfos').doc(uid).delete();
-      // Remove the deleted item from the local state
-      setData(prevData => prevData.filter(item => item.uid !== uid));
+      await firestore().collection('newinfos').doc(deleteUid).delete();
+
+      // Local state থেকে delete করা
+      setData(prevData => prevData.filter(item => item.uid !== deleteUid));
+
+      // Modal close
+      setDeleteConfirmVisible(false);
+      setDeleteUid('');
     } catch (error) {
       console.error('Error deleting document:', error);
     } finally {
       setLoader(false);
     }
   };
+
+  /* -------------------------------------------------------------------------- */
+  /* Cancel Delete                                                              */
+  /* -------------------------------------------------------------------------- */
+
+  const cancelDelete = () => {
+    setDeleteConfirmVisible(false);
+    setDeleteUid('');
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /* Phone Call                                                                 */
+  /* -------------------------------------------------------------------------- */
 
   const handleCall = async (phone: string) => {
     const url = `tel:${phone}`;
@@ -264,13 +257,27 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /* Render                                                                     */
+  /* -------------------------------------------------------------------------- */
+
   return (
     <>
-      {/* Search Area */}
+      {/* -------------------------------------------------------------------- */}
+      {/* Search Area                                                          */}
+      {/* -------------------------------------------------------------------- */}
+
       <View className="flex-row border border-gray-300 mx-4 my-2 rounded-full items-center px-3 bg-gray-300 justify-center">
         <View className="w-1/10">
-          <Icons name="search" style={{color: '#444', fontSize: 30}} />
+          <Icons
+            name="search"
+            style={{
+              color: '#444',
+              fontSize: 30,
+            }}
+          />
         </View>
+
         <View className="w-4/5">
           <TextInput
             value={searchText}
@@ -286,12 +293,17 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
             }}
           />
         </View>
+
         <View className="w-1/10">
           <Text className="text-gray-900 text-right text-base font-HindSemiBold">
             {filteredData?.length || ''}
           </Text>
         </View>
       </View>
+
+      {/* -------------------------------------------------------------------- */}
+      {/* Loading                                                               */}
+      {/* -------------------------------------------------------------------- */}
 
       {loader && (
         <View
@@ -308,8 +320,17 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
         </View>
       )}
 
+      {/* -------------------------------------------------------------------- */}
+      {/* Network Error / Student Table                                         */}
+      {/* -------------------------------------------------------------------- */}
+
       {netStatus ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Text
             style={{
               color: '#444',
@@ -319,14 +340,18 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
             }}>
             নেটওয়ার্ক কানেকশন সমস্যা!
           </Text>
+
           <Image
             source={require('../../assets/images/disconnect.png')}
-            style={{width: 200, height: 200}}
+            style={{
+              width: 200,
+              height: 200,
+            }}
             resizeMode="contain"
           />
         </View>
       ) : (
-        <NewInfoTable
+        <NewStuInfoTable
           data={searchText === '' ? data : filteredData}
           navigation={navigation}
           route={route}
@@ -337,13 +362,18 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
         />
       )}
 
-      {/* Modal */}
+      {/* ==================================================================== */}
+      {/* Admission Modal                                                       */}
+      {/* ==================================================================== */}
+
       <Modal
         transparent
         animationType="fade"
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)} // For Android back button
-      >
+        onRequestClose={() => {
+          setModalVisible(false);
+          resetModalForm();
+        }}>
         <View style={styles.modalBackground}>
           <View className="w-[90%] bg-white py-5 px-10 rounded-lg justify-center">
             {loader && (
@@ -354,25 +384,28 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
                   right: 170,
                   zIndex: 1000,
                 }}>
-                <ActivityIndicator color={'#000'} />
+                <Loading />
               </View>
             )}
 
             <TouchableOpacity
               className="absolute top-5 right-5"
-              onPress={() => setModalVisible(false)}>
-              <Icon name={'close'} size={25} color="red" />
+              onPress={() => {
+                setModalVisible(false);
+                resetModalForm();
+              }}>
+              <Icon name="close" size={25} color="red" />
             </TouchableOpacity>
 
             <Text className="text-base text-black font-HindSemiBold text-center py-2">
-              ভর্তি নিশ্চায়ন ফরম
+              ভর্তি কাউন্ট ফরম
             </Text>
 
             <ControlledInput
               control={control}
-              name={'total_add_fee'}
-              placeholder={''}
-              label={'সর্বমোট ভর্তি-ফি (টাকা)'}
+              name="total_add_fee"
+              placeholder=""
+              label="সর্বমোট ভর্তি-ফি"
               keyboardType="numeric"
               style={{
                 backgroundColor: '#FFF',
@@ -380,10 +413,24 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
                 marginBottom: 20,
               }}
             />
+
+            <ControlledInput
+              control={control}
+              name="commission"
+              placeholder=""
+              label="কমিশন (%)"
+              keyboardType="numeric"
+              style={{
+                backgroundColor: '#FFF',
+                fontFamily: 'HindSiliguri-SemiBold',
+                marginBottom: 20,
+              }}
+            />
+
             <RadioButtons
               control={control}
               name="add_point"
-              labelTitle={'ভর্তিতে অবদান রাখা শিক্ষক সংখ্যা'}
+              labelTitle="ভর্তিতে অবদান রাখা শিক্ষক সংখ্যা"
               direction="column"
               items={addPointData}
             />
@@ -391,9 +438,70 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
             <Button
               className="my-5"
               onPress={handleSubmit(update)}
-              mode={'contained'}>
+              mode="contained">
               কাউন্ট নিশ্চিত করুন
             </Button>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ==================================================================== */}
+      {/* Delete Confirmation Modal                                              */}
+      {/* ==================================================================== */}
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={deleteConfirmVisible}
+        onRequestClose={cancelDelete}>
+        <View style={styles.modalBackground}>
+          <View className="w-[85%] bg-white rounded-2xl px-6 py-7">
+            {/* Warning Icon */}
+            <View className="items-center mb-3">
+              <Icon name="exclamationcircleo" size={48} color="#DC2626" />
+            </View>
+
+            {/* Title */}
+            <Text className="text-xl text-black font-HindSemiBold text-center">
+              তথ্য মুছে ফেলবেন?
+            </Text>
+
+            {/* Warning Text */}
+            <Text className="text-base text-gray-600 font-HindRegular text-center mt-2 leading-6">
+              আপনি কি নিশ্চিতভাবে এই শিক্ষার্থীর তথ্য মুছে ফেলতে চান?
+              {'\n'}
+              মুছে ফেলার পর তথ্যটি আর ফিরে পাওয়া যাবে না।
+            </Text>
+
+            {/* Buttons */}
+            <View className="flex-row mt-6">
+              <Button
+                mode="outlined"
+                onPress={cancelDelete}
+                style={{
+                  flex: 1,
+                  marginRight: 6,
+                }}
+                contentStyle={{
+                  paddingVertical: 3,
+                }}>
+                বাতিল
+              </Button>
+
+              <Button
+                mode="contained"
+                buttonColor="#DC2626"
+                onPress={confirmDelete}
+                style={{
+                  flex: 1,
+                  marginLeft: 6,
+                }}
+                contentStyle={{
+                  paddingVertical: 3,
+                }}>
+                মুছে ফেলুন
+              </Button>
+            </View>
           </View>
         </View>
       </Modal>
@@ -403,6 +511,10 @@ const NewStuInfoScreen: React.FC<NewStuInfoScreenProps> = ({
 
 export default NewStuInfoScreen;
 
+/* ========================================================================== */
+/* Styles                                                                     */
+/* ========================================================================== */
+
 const styles = StyleSheet.create({
   button: {
     paddingVertical: 12,
@@ -410,151 +522,15 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     borderRadius: 8,
   },
+
   buttonText: {
     color: '#000',
   },
+
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
 });
-
-const NewInfoTable = ({
-  data,
-  navigation,
-  route,
-  setModalVisible,
-  setDocuid,
-  handleDelete,
-  handleCall,
-}: {
-  data: StudentInfo[];
-  navigation: NativeStackNavigationProp<any, any>;
-  route: RouteProp<any, any>;
-  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setDocuid: React.Dispatch<React.SetStateAction<string>>;
-  handleDelete: (uid: string) => Promise<void>;
-  handleCall: (phone: string) => Promise<void>;
-}) => {
-  const {user} = useAuthContexts();
-  const [page, setPage] = React.useState<number>(0);
-  const [numberOfItemsPerPageList] = React.useState([10, 8, 12]);
-  const [itemsPerPage, onItemsPerPageChange] = React.useState(
-    numberOfItemsPerPageList[0],
-  );
-
-  const from = page * itemsPerPage;
-  const to = Math.min((page + 1) * itemsPerPage, data.length);
-
-  React.useEffect(() => {
-    setPage(0);
-  }, [itemsPerPage]);
-
-  return (
-    <DataTable>
-      <DataTable.Pagination
-        page={page}
-        numberOfPages={Math.ceil(data.length / itemsPerPage)}
-        onPageChange={page => setPage(page)}
-        label={`${from + 1}-${to} of ${data.length}`}
-        numberOfItemsPerPageList={numberOfItemsPerPageList}
-        numberOfItemsPerPage={itemsPerPage}
-        onItemsPerPageChange={onItemsPerPageChange}
-        showFastPaginationControls
-        selectPageDropdownLabel={'Rows per page'}
-      />
-
-      {data.slice(from, to).map((item, index) => (
-        <DataTable.Row
-          style={{
-            backgroundColor: index % 2 === 0 ? '#FFF' : '#eee',
-            height: 60,
-          }}
-          key={item.uid}>
-          <DataTable.Cell style={{flex: 1}}>
-            <View className="justify-center items-center flex-row">
-              <Text className="text-sm pl-4 text-black font-HindSemiBold">
-                {index + 1}
-              </Text>
-            </View>
-          </DataTable.Cell>
-          <DataTable.Cell style={{flex: 5}}>
-            <View className="justify-center items-center flex-row">
-              <View className="flex-col">
-                <Text className="text-sm text-black font-HindSemiBold leading-5">
-                  {item.stu_name_bn}
-                </Text>
-                <Text className="text-xs text-gray-400 font-HindSemiBold leading-5">
-                  {item.ref_person +
-                    ' | ' +
-                    item.village +
-                    ' | ' +
-                    item.stu_class}
-                </Text>
-              </View>
-            </View>
-          </DataTable.Cell>
-
-          <DataTable.Cell
-            style={{flex: 1, height: '100%', justifyContent: 'center'}}>
-            <ThreeDots
-              items={[
-                {
-                  id: 'call',
-                  title: 'কল করুন',
-                  icon: 'phone-outline',
-                },
-                {
-                  id: 'view',
-                  title: 'বিস্তারিত দেখুন',
-                  icon: 'eye-outline',
-                },
-                {
-                  id: 'admission',
-                  title: 'ভর্তি করুন',
-                  icon: 'plus-circle-outline',
-                },
-                {
-                  id: 'delete',
-                  title: 'মুছে ফেলুন',
-                  icon: 'delete-outline',
-                  destructive: true,
-                },
-              ]}
-              onSelect={action => {
-                switch (action.id) {
-                  case 'call':
-                    handleCall(item.contact_1);
-                    break;
-
-                  case 'view':
-                    navigation.navigate('NewStudentDataDetailScreen', {
-                      stu_data: {
-                        ...item,
-                        send_date: item.send_date?.toISOString(),
-                      },
-                    });
-
-                  case 'admission':
-                    if (user?.role === 'admin') {
-                      setDocuid(item.uid);
-                      setModalVisible(true);
-                    }
-                    break;
-
-                  case 'delete':
-                    if (user?.role === 'admin') {
-                      handleDelete(item.uid);
-                    }
-                    break;
-                }
-              }}
-            />
-          </DataTable.Cell>
-        </DataTable.Row>
-      ))}
-    </DataTable>
-  );
-};

@@ -1,24 +1,16 @@
-import React, {useState} from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React from 'react';
+import {Alert, Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 import ControlledInput from '../../comps/Inputs/ControlledInput';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {UserInfoType, UserInfoSchema} from '../../lib/zodschemas/zodSchemas';
-import {Button, Card} from 'react-native-paper';
+import {Button} from 'react-native-paper';
 import CustomPicker from '../../comps/pickers/CustomPicker';
-import {branchData, classes} from '../../lib/jsonValue/PickerData';
+import {branchData} from '../../lib/jsonValue/PickerData';
 import {useAuthContexts} from '../../contexts/AuthContext';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
-import AdmissionFormContainer from '../../comps/Containers/AdmissionFormContainer';
+import Loading from '../../comps/activityLoder/Loading';
 interface SignUpScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
@@ -36,7 +28,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
     defaultValues: {
       role: 'editor',
       title: 'সহকারী শিক্ষক',
-      relatedClass: 'প্রি-প্লে',
+      relatedClass: 'প্লে',
     },
   });
 
@@ -74,8 +66,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
         justifyContent: 'center',
       }}>
       {loader && (
-        <View className="absolute top-5 right-5">
-          <ActivityIndicator size="large" color="#000" />
+        <View className="absolute top-50 right-50">
+          <Loading />
         </View>
       )}
       <View style={{alignItems: 'center', marginVertical: 5}}>

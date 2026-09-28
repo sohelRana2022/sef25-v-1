@@ -9,6 +9,7 @@ type MenuItem = {
   menuTitle: string;
   icon: string;
   route: string;
+  screen?: string;
   routeStatus: boolean;
   adminOnly?: boolean;
 };
@@ -22,34 +23,49 @@ type MenuListProps = {
   back?: () => void;
 };
 
-const MenuList = (props: MenuListProps) => {
+const MenuList = ({navigation, menuData, menuTitle}: MenuListProps) => {
   const {user} = useAuthContexts();
-  const {navigation, menuData, menuTitle} = props;
+
+  const filteredMenuData = menuData.filter(item => {
+    if (!item.routeStatus) {
+      return false;
+    }
+
+    if (item.adminOnly) {
+      return user?.role === 'admin';
+    }
+
+    return true;
+  });
+
+  const handleMenuPress = (item: MenuItem) => {
+    if (item.screen) {
+      navigation.navigate(item.route, {
+        screen: item.screen,
+        params: {
+          ref_uid: user?.uid,
+        },
+      });
+
+      return;
+    }
+
+    navigation.navigate(item.route, {
+      ref_uid: user?.uid,
+    });
+  };
 
   return (
     <View style={styles.MenuContainer}>
       <Text style={styles.menuTitle}>{menuTitle}</Text>
+
       <FlatList
-        data={menuData.filter(item => {
-          if (!item.routeStatus) return false;
-
-          // adminOnly হলে শুধু admin দেখতে পারবে
-          if (item.adminOnly) {
-            return user?.role === 'admin';
-          }
-
-          // সাধারণ menu admin/editor সবাই দেখতে পারবে
-          return true;
-        })}
+        data={filteredMenuData}
         numColumns={4}
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => (
           <TouchableOpacity
-            onPress={() =>
-              navigation.navigate(item.route, {
-                ref_uid: user?.uid,
-              })
-            }
+            onPress={() => handleMenuPress(item)}
             style={styles.menuButton}>
             <View style={styles.menu}>
               <Icons style={styles.menuIcon} name={item.icon} color="#FFF" />
@@ -73,6 +89,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#FFF',
   },
+
   menuTitle: {
     color: '#666',
     fontSize: 14,
@@ -83,21 +100,24 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     marginBottom: 10,
   },
+
   menuButton: {
     width: 70,
     height: 70,
     marginLeft: -10,
     marginRight: 10,
   },
+
   menu: {
-    display: 'flex',
     alignItems: 'center',
     paddingVertical: 5,
   },
+
   menuIcon: {
     fontSize: 30,
     color: '#999',
   },
+
   menuName: {
     textAlign: 'center',
     fontSize: 12,

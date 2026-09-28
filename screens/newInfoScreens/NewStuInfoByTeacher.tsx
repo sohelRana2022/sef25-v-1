@@ -12,10 +12,8 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {studentDataType, summary} from '../../lib/dTypes/StudentDataType';
-import {
-  getRemainingDays,
-  summarizeByRefPerson,
-} from '../../lib/helpers/helpers';
+import {summarizeByRefPerson} from '../../lib/helpers/helpers';
+import Loading from '../../comps/activityLoder/Loading';
 
 type RootStackParamList = {
   NewStuInfoByTeacher: {ref_uid: string};
@@ -31,7 +29,6 @@ interface NewStuInfoByTeacherProps {
 }
 
 const NewStuInfoByTeacher = (props: NewStuInfoByTeacherProps) => {
-  const {user} = useAuthContexts();
   const {navigation, route} = props;
   const [loader, setLoader] = useState<boolean>(false);
   const [myData, setMyData] = useState<studentDataType[]>([]);
@@ -47,7 +44,7 @@ const NewStuInfoByTeacher = (props: NewStuInfoByTeacherProps) => {
       prev7DayaData: 0,
     },
   ]);
-
+  console.log('Current ref_uid:', route.params.ref_uid);
   const getMyData = async () => {
     setLoader(true);
     try {
@@ -62,7 +59,7 @@ const NewStuInfoByTeacher = (props: NewStuInfoByTeacherProps) => {
         .where('send_date', '>=', startOfYear)
         .orderBy('send_date', 'asc')
         .get();
-      console.log(route.params.ref_uid);
+
       const newStuData = snapshot.docs.map(doc => {
         const data = doc.data();
         const send_date = data?.send_date.toDate();
@@ -88,7 +85,6 @@ const NewStuInfoByTeacher = (props: NewStuInfoByTeacherProps) => {
           send_date: send_date,
           add_point: data.add_point,
           is_active: data.is_active,
-          valid_days: data.valid_days,
           total_add_fee: data.add_fee ?? 0,
           commission: data.commission ?? 0,
         };
@@ -137,6 +133,20 @@ const NewStuInfoByTeacher = (props: NewStuInfoByTeacherProps) => {
 
   return (
     <View style={styles.container}>
+      {loader && (
+        <View
+          style={{
+            position: 'absolute',
+            top: '45%',
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}>
+          <Loading />
+        </View>
+      )}
       <Text className="text-center text-black font-HindSemiBold text-lg py-3">
         {summery[0].ref_person ?? ''}
       </Text>

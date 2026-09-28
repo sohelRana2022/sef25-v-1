@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, ScrollView, Text, View} from 'react-native';
-import {Card, DataTable} from 'react-native-paper';
+import {ScrollView, Text, View} from 'react-native';
+import {DataTable} from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
 import {useAppContexts} from '../../contexts/AppContext';
 import {useAuthContexts} from '../../contexts/AuthContext';
@@ -9,6 +9,7 @@ import {RouteProp} from '@react-navigation/native';
 import {studentDataType, summary} from '../../lib/dTypes/StudentDataType';
 import {summarizeByRefPerson} from '../../lib/helpers/helpers';
 import Loading from '../../comps/activityLoder/Loading';
+
 interface StatisticsScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
   route: RouteProp<any, any>;
@@ -16,32 +17,25 @@ interface StatisticsScreenProps {
 }
 
 const StatisticsScreen = (props: StatisticsScreenProps) => {
-  const [allData, setAllData] = useState<studentDataType[]>([]);
   const [summeryData, setSummeryData] = useState<summary[]>([]);
-  const {navigation, route} = props;
+
+  const {navigation} = props;
+
   const {loader, setLoader} = useAppContexts();
   const {user} = useAuthContexts();
-  const listHeader = () => {
-    return (
-      <Card className="flex-1 px-1 py-1 mx-2 my-0.5 justify-center items-center">
-        <View className="flex-row">
-          <Text className="w-[15%] text-gray-900 font-HindRegular text-center text-base">{`ক্রমিক`}</Text>
-          <Text className="w-[40%] text-gray-900 font-HindRegular text-left text-base">{`শিক্ষকের নাম`}</Text>
-          <Text className="w-[15%] text-gray-900 font-HindRegular text-center text-base">{`সংগ্রহ`}</Text>
-          <Text className="w-[15%] text-gray-900 font-HindRegular text-center text-base">{`১০০%`}</Text>
-          <Text className="w-[15%] text-gray-900 font-HindRegular text-center text-base">{`ভর্তি`}</Text>
-        </View>
-      </Card>
-    );
-  };
 
   const getChartData = async () => {
     setLoader(true);
+
     try {
-      const currentYear = new Date().getFullYear(); // 2025
+      const currentYear = new Date().getFullYear();
 
       const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-      if (!user?.branch) return;
+
+      if (!user?.branch) {
+        return;
+      }
+
       const snapshot = await firestore()
         .collection('newinfos')
         .where('sef_branch', '==', user.branch)
@@ -49,9 +43,13 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
         .orderBy('send_date', 'desc')
         .get();
 
-      const newStuData = snapshot.docs.map(doc => {
+      const newStuData: studentDataType[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        const send_date = data?.send_date.toDate();
+
+        const send_date = data?.send_date?.toDate
+          ? data.send_date.toDate()
+          : new Date();
+
         return {
           uid: doc.id,
           stu_name_bn: data.stu_name_bn,
@@ -79,10 +77,14 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
           commission: data.commission ?? 0,
         };
       });
+
       const countedData = summarizeByRefPerson(newStuData);
+
+      console.log('SUMMARY:', countedData);
+
       setSummeryData(countedData);
     } catch (error) {
-      console.log(error);
+      console.log('Statistics error:', error);
     } finally {
       setLoader(false);
     }
@@ -93,19 +95,20 @@ const StatisticsScreen = (props: StatisticsScreenProps) => {
   }, []);
 
   return (
-    <>
+    <View style={{flex: 1}}>
       {loader ? (
-        <View className="justify-center items-center flex-1">
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Loading />
         </View>
       ) : (
-        <StatisticTable
-          data={summeryData}
-          navigation={navigation}
-          route={route}
-        />
+        <StatisticTable data={summeryData} navigation={navigation} />
       )}
-    </>
+    </View>
   );
 };
 
@@ -114,161 +117,206 @@ export default StatisticsScreen;
 type StatisticTableProps = {
   data: summary[];
   navigation: NativeStackNavigationProp<any, any>;
-  route: RouteProp<any, any>;
 };
 
-const StatisticTable = ({data, navigation, route}: StatisticTableProps) => {
+const StatisticTable = ({data, navigation}: StatisticTableProps) => {
   const {user} = useAuthContexts();
 
-  return (
-    <DataTable>
-      <DataTable.Header style={{backgroundColor: '#ddd'}}>
-        <DataTable.Title style={{flex: 1}}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingLeft: 10,
-            }}>
-            <Text className="text-left text-black font-HindSemiBold">ক্রম</Text>
-          </View>
-        </DataTable.Title>
-        <DataTable.Title style={{flex: 3}}>
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text className="text-left text-black font-HindSemiBold">
-              শিক্ষকের নাম
-            </Text>
-          </View>
-        </DataTable.Title>
-        <DataTable.Title style={{flex: 1}}>
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text className="text-center text-black font-HindSemiBold">
-              মোট
-            </Text>
-          </View>
-        </DataTable.Title>
-        <DataTable.Title style={{flex: 1.5}}>
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text className="text-center text-black font-HindSemiBold">
-              এই সপ্তাহ
-            </Text>
-          </View>
-        </DataTable.Title>
-        <DataTable.Title style={{flex: 1}}>
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text className="text-center text-black font-HindSemiBold">
-              ১০০%
-            </Text>
-          </View>
-        </DataTable.Title>
-        <DataTable.Title style={{flex: 1}}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingLeft: 10,
-            }}>
-            <Text className="text-center text-black font-HindSemiBold">
-              ভর্তি
-            </Text>
-          </View>
-        </DataTable.Title>
-      </DataTable.Header>
+  /*
+   * toral_add অনুযায়ী descending sorting।
+   */
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {data.map((item, index) => (
-          <DataTable.Row
-            style={{backgroundColor: index % 2 === 0 ? '#FFF' : '#eee'}}
-            key={item.ref_uid}
-            onPress={() => {
-              user?.uid === item.ref_uid || user?.role === 'admin'
-                ? navigation.navigate('NewStuInfoByTeacher', {
+  const sortedData = [...data].sort((a, b) => {
+    const aTotal = Number(a.total_add) || 0;
+    const bTotal = Number(b.total_add) || 0;
+
+    return bTotal - aTotal;
+  });
+
+  return (
+    <View style={{flex: 1}}>
+      {/* Fixed Header */}
+      <DataTable>
+        <DataTable.Header
+          style={{
+            backgroundColor: '#ddd',
+          }}>
+          <DataTable.Title style={{flex: 1}}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text className="text-black font-HindSemiBold">ক্রম</Text>
+            </View>
+          </DataTable.Title>
+
+          <DataTable.Title style={{flex: 3}}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text className="text-black font-HindSemiBold">শিক্ষকের নাম</Text>
+            </View>
+          </DataTable.Title>
+
+          <DataTable.Title style={{flex: 1}}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text className="text-black font-HindSemiBold">মোট</Text>
+            </View>
+          </DataTable.Title>
+
+          <DataTable.Title style={{flex: 1.5}}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text className="text-black font-HindSemiBold">এই সপ্তাহ</Text>
+            </View>
+          </DataTable.Title>
+
+          <DataTable.Title style={{flex: 1}}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text className="text-black font-HindSemiBold">১০০%</Text>
+            </View>
+          </DataTable.Title>
+
+          <DataTable.Title style={{flex: 1}}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text className="text-black font-HindSemiBold">ভর্তি</Text>
+            </View>
+          </DataTable.Title>
+        </DataTable.Header>
+      </DataTable>
+
+      {/* Scrollable Rows */}
+      <ScrollView
+        style={{flex: 1}}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{
+          paddingBottom: 30,
+        }}>
+        <DataTable>
+          {sortedData.map((item, index) => (
+            <DataTable.Row
+              key={item.ref_uid}
+              style={{
+                backgroundColor: index % 2 === 0 ? '#FFF' : '#eee',
+              }}
+              onPress={() => {
+                if (user?.uid === item.ref_uid || user?.role === 'admin') {
+                  navigation.navigate('NewStuInfoByTeacher', {
                     ref_uid: item.ref_uid,
-                  })
-                : null;
-            }}>
-            <DataTable.Cell style={{flex: 1}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text className="text-center text-black font-HindSemiBold">
-                  {index + 1}
-                </Text>
-              </View>
-            </DataTable.Cell>
-            <DataTable.Cell style={{flex: 3}}>
-              <View
-                style={{
-                  flex: 3,
-                  justifyContent: 'center',
-                  alignItems: 'flex-start',
-                }}>
-                <Text className="text-black font-HindSemiBold">
-                  {item.ref_person}
-                </Text>
-              </View>
-            </DataTable.Cell>
-            <DataTable.Cell style={{flex: 1}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text className="text-black font-HindSemiBold">
-                  {' '}
-                  {item.total}
-                </Text>
-              </View>
-            </DataTable.Cell>
-            <DataTable.Cell style={{flex: 1.5}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text className="text-center text-black font-HindSemiBold">
-                  {item.prev7DayaData}
-                </Text>
-              </View>
-            </DataTable.Cell>
-            <DataTable.Cell style={{flex: 1}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text className="text-center text-black font-HindSemiBold">
-                  {item.posibility100}
-                </Text>
-              </View>
-            </DataTable.Cell>
-            <DataTable.Cell style={{flex: 1}}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text className="text-center text-black font-HindSemiBold">
-                  {item.total_add}
-                </Text>
-              </View>
-            </DataTable.Cell>
-          </DataTable.Row>
-        ))}
+                  });
+                }
+              }}>
+              {/* ক্রম */}
+              <DataTable.Cell style={{flex: 1}}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text className="text-black font-HindSemiBold">
+                    {index + 1}
+                  </Text>
+                </View>
+              </DataTable.Cell>
+
+              {/* শিক্ষকের নাম */}
+              <DataTable.Cell style={{flex: 3}}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                  }}>
+                  <Text className="text-black font-HindSemiBold">
+                    {item.ref_person}
+                  </Text>
+                </View>
+              </DataTable.Cell>
+
+              {/* মোট */}
+              <DataTable.Cell style={{flex: 1}}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text className="text-black font-HindSemiBold">
+                    {item.total}
+                  </Text>
+                </View>
+              </DataTable.Cell>
+
+              {/* এই সপ্তাহ */}
+              <DataTable.Cell style={{flex: 1.5}}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text className="text-black font-HindSemiBold">
+                    {item.prev7DayaData}
+                  </Text>
+                </View>
+              </DataTable.Cell>
+
+              {/* ১০০% */}
+              <DataTable.Cell style={{flex: 1}}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text className="text-black font-HindSemiBold">
+                    {item.posibility100}
+                  </Text>
+                </View>
+              </DataTable.Cell>
+
+              {/* ভর্তি */}
+              <DataTable.Cell style={{flex: 1}}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text className="text-black font-HindSemiBold">
+                    {item.total_add}
+                  </Text>
+                </View>
+              </DataTable.Cell>
+            </DataTable.Row>
+          ))}
+        </DataTable>
       </ScrollView>
-    </DataTable>
+    </View>
   );
 };
